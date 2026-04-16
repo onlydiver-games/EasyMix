@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mixing Scale-Up Toolkit</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:#1a1a1a;background:#f4f3f0;min-height:100vh}
+:root{--blue:#185FA5;--blue-light:#E6F1FB;--amber:#BA7517;--amber-light:#FAEEDA;--green:#3B6D11;--green-light:#EAF3DE;--red:#A32D2D;--red-light:#FCEBEB;--border:#d0cec6;--card:#fff;--text:#1a1a1a;--muted:#6b6960;--subtle:#a8a59e}
+h1{font-size:17px;font-weight:600}h2{font-size:14px;font-weight:600}h3{font-size:12px;font-weight:600}
+label{font-size:11px;color:var(--muted);display:block;margin-bottom:2px}
+input[type=number],input[type=text],select{width:100%;padding:5px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;background:#fff;color:#1a1a1a;height:28px}
+input:focus,select:focus{outline:2px solid var(--blue);outline-offset:-1px;border-color:transparent}
+input[type=range]{width:100%;accent-color:var(--blue)}
+.app{display:grid;grid-template-columns:310px 1fr;gap:0;min-height:100vh}
+.sidebar{background:#fff;border-right:1px solid var(--border);padding:14px;overflow-y:auto;max-height:100vh;position:sticky;top:0}
+.main{padding:14px;overflow-y:auto}
+.section{margin-bottom:16px}
+.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #eee}
+.tank-block{background:#fafaf9;border-radius:8px;padding:10px;border:1px solid var(--border);margin-bottom:10px}
+.tlabel-s{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:8px}
+.tlabel-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--amber);margin-bottom:8px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:6px}
+.f{margin-bottom:6px}
+.cf{background:#f0f4fa;border:1px solid #c5d7ef;border-radius:5px;padding:5px 8px;font-size:12px;color:var(--blue);font-weight:500;height:28px;display:flex;align-items:center}
+.cl{font-size:11px;color:var(--blue);font-weight:500;margin-bottom:2px}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:14px;flex-wrap:wrap;gap:0}
+.tab{padding:7px 12px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab:hover{color:#1a1a1a}.tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.pcard{background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;transition:box-shadow .15s;position:relative}
+.pcard:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.pcard.warn{border-color:#EF9F27;background:#fffdf7}
+.pcard.locked{opacity:.4;pointer-events:none}
+.pcard.err{border-color:#E24B4A;background:#fff8f8}
+.pcard.hi{border-color:var(--blue);background:#f5f9ff}
+.pname{font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:4px}
+.pvals{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.vs{font-size:15px;font-weight:600;color:var(--blue)}
+.vl{font-size:15px;font-weight:600;color:var(--amber)}
+.pu{font-size:10px;color:var(--subtle);margin-left:auto}
+.rpill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600;margin-top:4px}
+.rg{background:var(--green-light);color:var(--green)}.ra{background:var(--amber-light);color:var(--amber)}.rr{background:var(--red-light);color:var(--red)}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600}
+.b-w{background:var(--amber-light);color:var(--amber)}.b-ok{background:var(--green-light);color:var(--green)}
+.b-e{background:var(--red-light);color:var(--red)}.b-i{background:var(--blue-light);color:var(--blue)}.b-x{background:#eee;color:#888}
+.tip{position:relative;display:inline-flex;align-items:center}
+.ti{width:14px;height:14px;border-radius:50%;background:#eee;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);cursor:pointer;flex-shrink:0;font-style:italic;font-weight:700}
+.tb{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);width:275px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:11px;line-height:1.55;color:var(--muted);z-index:300;box-shadow:0 4px 16px rgba(0,0,0,.12);pointer-events:none}
+.tb.r{left:auto;right:0;transform:none}.tip:hover .tb{display:block}
+.tt{font-weight:600;color:#1a1a1a;margin-bottom:4px;font-size:12px}
+.tcite{font-size:10px;color:var(--subtle);margin-top:6px;font-style:italic;padding-top:5px;border-top:1px solid #eee}
+.tv{font-size:10px;margin-top:5px;padding:4px 7px;border-radius:4px;background:#fffdf0;color:#854F0B;border:1px solid #f0d090}
+.wb{background:#fffdf0;border:1px solid #EF9F27;border-radius:6px;padding:7px 10px;font-size:11px;color:#7a4a00;margin-bottom:8px;line-height:1.5}
+.eb{background:#fff8f8;border:1px solid #E24B4A;border-radius:6px;padding:7px 10px;font-size:11px;color:var(--red);margin-bottom:8px;line-height:1.5}
+.ib{background:var(--blue-light);border:1px solid #aacfee;border-radius:6px;padding:7px 10px;font-size:11px;color:#0d3f6e;margin-bottom:8px;line-height:1.5}
+.gb{background:#f0f8e8;border:1px solid #9bd458;border-radius:6px;padding:7px 10px;font-size:11px;color:#2a5008;margin-bottom:8px;line-height:1.5}
+.geo-bar{height:9px;border-radius:5px;background:#eee;overflow:hidden;margin:7px 0 2px}
+.geo-fill{height:100%;border-radius:5px;transition:width .4s,background .4s}
+.vpair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.vbox{background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.vlbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.ctbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px}
+.ctbl th{font-weight:600;padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;font-size:11px;color:var(--muted);background:#fafaf9}
+.ctbl td{padding:6px 8px;border-bottom:1px solid #f0eeeb;vertical-align:top}
+.ctbl tr:last-child td{border-bottom:none}
+.psumm{background:#fafaf9;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px}
+.prow{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid #f0eeeb}
+.prow:last-child{border-bottom:none}
+.pk{font-size:12px;color:var(--muted)}.pv{font-size:13px;font-weight:600}
+.rbox{border-radius:7px;padding:8px 10px;margin-bottom:7px;border:1px solid transparent;font-size:12px}
+.rt{background:#f0f8e8;border-color:#9bd458}.rtn{background:#fffdf0;border-color:#f0c040}.rl{background:#fff0f0;border-color:#f08080}
+.sr{display:grid;grid-template-columns:130px 1fr 72px 72px;align-items:center;gap:8px;margin-bottom:10px}
+.sr label{font-size:12px;color:var(--muted);margin:0}
+.obs-card{background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px;margin-bottom:7px}
+.obs-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.btn-rm{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 2px}
+.btn-add{width:100%;padding:6px;border:1px dashed var(--border);border-radius:6px;background:transparent;font-size:12px;color:var(--muted);cursor:pointer;margin-top:4px}
+.btn-add:hover{background:#fafaf9;color:#1a1a1a}
+.gsn{font-size:22px;font-weight:700}
+.ghdr{display:flex;justify-content:space-between;align-items:flex-start}
+/* Context selector chips */
+.ctx-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px}
+.ctx-chip{padding:7px 8px;border:1.5px solid var(--border);border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);background:#fff;text-align:center;transition:all .15s;line-height:1.3}
+.ctx-chip:hover{border-color:var(--blue);color:var(--blue)}
+.ctx-chip.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
+.ctx-chip.multi:hover{border-color:#7B3F9E;color:#5a2080}
+.ctx-chip.multi.active{border-color:#7B3F9E;background:#F3EAF8;color:#5a2080}
+/* Feasibility window chart */
+.feas-wrap{position:relative;margin:10px 0}
+canvas.feas{width:100%;border-radius:6px}
+/* Da number indicator */
+.da-indicator{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;border:1px solid var(--border);margin-bottom:10px;background:#fff}
+.da-bar-wrap{flex:1;height:12px;border-radius:6px;background:#eee;overflow:hidden}
+.da-bar{height:100%;border-radius:6px;transition:width .4s,background .4s}
+/* N recommendation callout */
+.n-callout{background:#fff;border:2px solid var(--blue);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.n-callout .nc-val{font-size:26px;font-weight:700;color:var(--blue);white-space:nowrap}
+.n-callout .nc-label{font-size:11px;color:var(--muted);line-height:1.5}
+/* Spacing warning badge */
+.spacing-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:5px}
+/* Heat transfer panel */
+.ht-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+/* Constraint bar */
+.cbar-wrap{margin:8px 0}
+.cbar-label{font-size:11px;color:var(--muted);margin-bottom:3px;display:flex;justify-content:space-between}
+.cbar-track{height:10px;border-radius:5px;background:#eee;position:relative;overflow:visible}
+.cbar-fill{height:100%;border-radius:5px;position:absolute;top:0}
+.cbar-marker{position:absolute;top:-4px;width:3px;height:18px;border-radius:2px;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- SIDEBAR -->
+<div class="sidebar">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+  <h1>Mixing Scale-Up</h1><span class="badge b-i">v2.0</span>
+</div>
+
+<!-- PROCESS CONTEXT -->
+<div class="section">
+<div class="section-title">Process context <span class="tip"><span class="ti">i</span><span class="tb r"><span class="tt">Process context</span>Selecting a context highlights the most relevant parameters, pre-selects the appropriate scale-up criterion, activates relevant input sections, and — for multi-phase systems — enters constraint mode to show the feasibility window where all constraints are simultaneously satisfied.</span></span></div>
+<div class="ctx-grid" id="ctx-grid">
+  <div class="ctx-chip active" data-ctx="general" onclick="setCtx('general',this)">⚗ General / blending</div>
+  <div class="ctx-chip" data-ctx="gasliq" onclick="setCtx('gasliq',this)">💨 Gas-liquid (aerated)</div>
+  <div class="ctx-chip" data-ctx="solidliq" onclick="setCtx('solidliq',this)">🪨 Solid-liquid suspension</div>
+  <div class="ctx-chip multi" data-ctx="threephase" onclick="setCtx('threephase',this)">⚡ 3-phase (gas+solid+liq)</div>
+  <div class="ctx-chip" data-ctx="shear" onclick="setCtx('shear',this)">🧫 Shear-sensitive</div>
+  <div class="ctx-chip" data-ctx="heattx" onclick="setCtx('heattx',this)">🌡 Heat transfer limited</div>
+</div>
+<div id="ctx-desc" style="font-size:11px;color:#0d3f6e;background:var(--blue-light);border:1px solid #aacfee;border-radius:6px;padding:8px 10px;margin-top:6px;line-height:1.55"></div>
+</div>
+
+<!-- REACTION TOGGLE -->
+<div class="section" id="sec-da">
+<div class="section-title">Reaction</div>
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+  <label style="display:flex;align-items:center;gap:7px;cursor:pointer;margin:0;font-size:12px;color:#1a1a1a;font-weight:500">
+    <input type="checkbox" id="has-rxn" onchange="toggleRxn()" style="width:15px;height:15px;cursor:pointer;flex-shrink:0">
+    Mixing involves a reaction
+  </label>
+</div>
+<div id="rxn-inputs" style="display:none">
+  <div class="f"><label>Reaction half-life t½ (s) <span class="tip"><span class="ti">i</span><span class="tb r"><span class="tt">Reaction half-life</span>Used to compute the Damköhler number Da = blend time / t½. Da &lt;&lt; 1: mixing fast, chemistry rate-limiting — criterion choice matters little. Da ≈ 1: mixing and reaction coupled — criterion critical. Da &gt;&gt; 1: mixing limiting — local gradients control selectivity and yield.<span class="tcite">Baldyga & Bourne (1999) Turbulent Mixing and Chemical Reactions</span></span></span></label>
+  <input type="number" id="t-half" value="30" min="0.001" max="100000" step="1" oninput="update()"></div>
+</div>
+</div>
+
+<!-- GAS-LIQUID INPUTS -->
+<div class="section" id="sec-gas" style="display:none">
+<div class="section-title">Gas-liquid parameters</div>
+<div class="fr">
+  <div class="f"><label>Gas flow rate Q_g (vvm) <span class="tip"><span class="ti">i</span><span class="tb r"><span class="tt">Gas flow rate (vvm)</span>Volumes of gas per volume of liquid per minute. Typical aerobic fermentation: 0.5–2 vvm. Higher vvm improves k_La but risks flooding. Flooding occurs when gas flow overwhelms impeller pumping capacity.<span class="tcite">van't Riet (1979) Ind. Eng. Chem. Proc. Des. Dev. 18:357</span></span></span></label>
+  <input type="number" id="vvm-s" value="1.0" min="0.01" max="10" step="0.1" oninput="update()"></div>
+  <div class="f"><label>Large scale Q_g (vvm)</label>
+  <input type="number" id="vvm-l" value="1.0" min="0.01" max="10" step="0.1" oninput="update()"></div>
+</div>
+<div class="f"><label>O₂ demand (mmol/L/h) <span class="tip"><span class="ti">i</span><span class="tb r"><span class="tt">Oxygen demand</span>Target oxygen transfer rate (OTR) required by the process. Aerobic fermentations: 50–200 mmol/L/h. Used to check if k_La × C* satisfies OTR. If k_La × C* &lt; OTR/1000, oxygen becomes limiting.<span class="tcite">Garcia-Ochoa & Gomez (2009) Biotechnol. Adv. 27:153</span></span></span></label>
+<input type="number" id="o2-demand" value="80" min="1" max="1000" step="1" oninput="update()"></div>
+</div>
+
+<!-- SOLIDS INPUTS -->
+<div class="section" id="sec-sol" style="display:none">
+<div class="section-title">Solids parameters</div>
+<div class="fr">
+  <div class="f"><label>Particle dia. d_p (μm) <span class="tip"><span class="ti">i</span><span class="tb r"><span class="tt">Particle diameter</span>Used in Zwietering N_js correlation. Standard range: 50–500 μm. For larger particles, N_js increases. Particles &lt; 20 μm follow fluid streamlines and rarely need suspension energy beyond turbulence.<span class="tcite">Zwietering (1958) Chem. Eng. Sci. 8:244</span></span></span></label>
+  <input type="number" id="dp" value="200" min="1" max="5000" step="10" oninput="update()"></div>
+  <div class="f"><label>Particle density ρ_p (kg/m³)</label>
+  <input type="number" id="rho-p" value="1500" min="500" max="5000" step="50" oninput="update()"></div>
+</div>
+<div class="f"><label>Solids loading X (wt%) <span class="tip"><span class="ti">i</span><span class="tb r"><span class="tt">Solids loading</span>Weight percent solids in slurry. Affects Zwietering S factor and slurry apparent viscosity (Krieger-Dougherty). Above ~30 wt%, slurry rheology becomes non-Newtonian regardless of fluid type. Zwietering correlation is most accurate for X &lt; 20 wt%.<span class="tcite">Zwietering (1958); Krieger & Dougherty (1959) Trans. Soc. Rheol. 3:137</span></span></span></label>
+<input type="number" id="x-sol" value="5" min="0.1" max="60" step="0.5" oninput="update()"></div>
+</div>
+
+<!-- HEAT TRANSFER INPUTS -->
+<div class="section" id="sec-ht" style="display:none">
+<div class="section-title">Heat transfer parameters</div>
+<div class="f"><label>Heat generation rate Q_rxn (W/L) <span class="tip"><span class="ti">i</span><span class="tb r"><span class="tt">Heat generation rate</span>Reaction heat per litre of process volume. Total load = Q_rxn × V_liq + P_agitator. For endothermic processes, enter a negative value. Scales with volume (∝T³) while cooling area scales as T².<span class="tcite">Stitt (2002) Chem. Eng. J. 90:47</span></span></span></label>
+<input type="number" id="q-rxn" value="5" min="-1000" max="1000" step="0.5" oninput="update()"></div>
+<div class="fr">
+  <div class="f"><label>Coolant inlet T (°C)</label><input type="number" id="t-cool-in" value="10" min="-20" max="150" step="1" oninput="update()"></div>
+  <div class="f"><label>Process setpoint T (°C)</label><input type="number" id="t-proc" value="37" min="-20" max="200" step="1" oninput="update()"></div>
+</div>
+<div class="f"><label>Overall HTC U (W/m²·K) <span class="tip"><span class="ti">i</span><span class="tb r"><span class="tt">Overall heat transfer coefficient</span>Water/water jacket: 400–800 W/m²K. Viscous fluid: 100–300. Coil in agitated vessel: 200–600. U increases with N^0.67 for jacketed vessels (Bondy-Lippa).<span class="tcite">Bondy & Lippa (1983) Chem. Eng. 90:62</span></span></span></label>
+<input type="number" id="htc-u" value="400" min="10" max="2000" step="10" oninput="update()"></div>
+<div class="f"><label>Jacket coverage (% of wall area) <span class="tip"><span class="ti">i</span><span class="tb r"><span class="tt">Jacket coverage</span>Fraction of the tank cylindrical wall area that is jacketed. Full conventional jacket = 100%. Half-pipe jacket or partial jacket designs may cover 50–80%. Dimple jackets can be 60–90%. This directly scales the effective jacket heat transfer area used in calculations.<span class="tcite">Bondy & Lippa (1983); Perry's Chemical Engineers' Handbook</span></span></span></label>
+<input type="number" id="jacket-pct" value="100" min="0" max="100" step="5" oninput="update()"></div>
+<div style="margin-top:8px">
+  <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px">Electrical resistance heating</div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin:0;font-size:12px;color:#1a1a1a;font-weight:500">
+      <input type="checkbox" id="has-elec-s" onchange="toggleElec()" style="width:14px;height:14px;cursor:pointer;flex-shrink:0">
+      Small scale electrical heater
+    </label>
+  </div>
+  <div id="elec-s-inputs" style="display:none">
+    <div class="f"><label>Rated power (W)</label><input type="number" id="elec-s-w" value="500" min="0" max="500000" step="50" oninput="update()"></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin:0;font-size:12px;color:#1a1a1a;font-weight:500">
+      <input type="checkbox" id="has-elec-l" onchange="toggleElec()" style="width:14px;height:14px;cursor:pointer;flex-shrink:0">
+      Large scale electrical heater
+    </label>
+  </div>
+  <div id="elec-l-inputs" style="display:none">
+    <div class="f"><label>Rated power (W)</label><input type="number" id="elec-l-w" value="5000" min="0" max="5000000" step="500" oninput="update()"></div>
+  </div>
+</div>
+</div>
+
+<!-- FLUID PROPERTIES -->
+<div class="section">
+<div class="section-title">Fluid properties</div>
+<div class="f"><label>Fluid type</label>
+<select id="fluid-type" onchange="update()">
+  <option value="newtonian">Newtonian</option>
+  <option value="powerlaw">Power-law (shear-thinning/thickening)</option>
+  <option value="bingham">Bingham plastic (yield stress)</option>
+</select></div>
+<div class="fr">
+  <div class="f"><label>Density ρ (kg/m³)</label><input type="number" id="density" value="1000" min="100" max="3000" step="10" oninput="update()"></div>
+  <div class="f"><label>Viscosity μ (mPa·s) <span class="tip"><span class="ti">i</span><span class="tb r"><span class="tt">Dynamic viscosity</span>Newtonian: constant. Water at 25°C ≈ 0.89. For non-Newtonian, this is the reference value; effective viscosity computed via Metzner-Otto. For slurries, apparent viscosity is corrected by Krieger-Dougherty when solids context is active.<span class="tcite">Metzner & Otto (1957) AIChE J. 3:3</span></span></span></label>
+  <input type="number" id="viscosity" value="1" min="0.1" max="100000" step="0.1" oninput="update()"></div>
+</div>
+<div id="nn-fields" style="display:none">
+  <div class="fr">
+    <div class="f"><label>Flow index n</label><input type="number" id="n-index" value="0.7" min="0.05" max="2" step="0.05" oninput="update()"></div>
+    <div class="f"><label>Consistency K (Pa·sⁿ)</label><input type="number" id="K-consist" value="0.5" min="0.001" max="1000" step="0.01" oninput="update()"></div>
+  </div>
+  <div id="bingham-fields" style="display:none">
+    <div class="f"><label>Yield stress τ₀ (Pa)</label><input type="number" id="tau0" value="5" min="0" max="500" step="0.5" oninput="update()"></div>
+  </div>
+</div>
+</div>
+
+<!-- SMALL SCALE -->
+<div class="section">
+<div class="section-title">Small-scale tank</div>
+<div class="tank-block" style="border-color:#aac8e8">
+<div class="tlabel-s">Small scale — Lab / Pilot</div>
+<div class="fr">
+  <div class="f"><label>Tank dia. T (m)</label><input type="number" id="s-T" value="0.15" min="0.01" max="10" step="0.01" oninput="update()"></div>
+  <div class="f"><label>Liquid height H (m)</label><input type="number" id="s-H" value="0.18" min="0.01" max="20" step="0.01" oninput="update()"></div>
+</div>
+<div class="fr">
+  <div class="f"><div class="cl">Volume V (L)</div><div class="cf" id="s-vol">—</div></div>
+  <div class="f"><div class="cl">Mass m (kg)</div><div class="cf" id="s-mass">—</div></div>
+</div>
+<div class="fr">
+  <div class="f"><label>Impeller dia. D (m)</label><input type="number" id="s-D" value="0.06" min="0.005" max="5" step="0.005" oninput="update()"></div>
+  <div class="f"><label>Speed N (rpm)</label><input type="number" id="s-N" value="300" min="1" max="3000" step="1" oninput="update()"></div>
+</div>
+<div class="fr">
+  <div class="f"><label>Off-bottom C (m) <span class="tip"><span class="ti">i</span><span class="tb"><span class="tt">Off-bottom clearance C</span>Distance from lowest blade to tank floor. Affects N_js (Zwietering S factor) and impeller position. Standard: C = T/3 (axial), T/4 (Rushton). Does not appear in Re, P/V, or blend time.<span class="tcite">Zwietering (1958)</span></span></span></label>
+  <input type="number" id="s-C" value="0.05" min="0.001" max="5" step="0.005" oninput="update()"></div>
+  <div class="f"><label>No. impellers</label><input type="number" id="s-nimp" value="1" min="1" max="4" step="1" oninput="update()"></div>
+</div>
+<div class="f"><label>Impeller type <span class="tip"><span class="ti">i</span><span class="tb"><span class="tt">Impeller type</span>Rushton: radial, high shear, Np≈5, best for gas dispersion. Pitched blade: axial/mixed, Np≈1.37. Hydrofoil: axial, low shear, Np≈0.3. Propeller: axial, Np≈0.35. Anchor: laminar only.<span class="tcite">Stitt (2002) Chem. Eng. J. 90:47</span></span></span></label>
+<select id="s-imp" onchange="update()">
+  <option value="rushton">Rushton (radial, high shear)</option>
+  <option value="ptb">Pitched-blade 45° (axial)</option>
+  <option value="hydrofoil">Hydrofoil (axial, low shear)</option>
+  <option value="propeller">Marine propeller</option>
+  <option value="anchor">Anchor / gate (laminar only)</option>
+</select></div>
+<div class="f"><label>Baffle config <span class="tip"><span class="ti">i</span><span class="tb"><span class="tt">Baffle configuration</span>Standard: 4 baffles w=T/10, full height. Partial-height baffles extend from bottom to h_frac of liquid height — suppress vortex without full baffling, used in gas-liquid to reduce surface aeration.<span class="tcite">Uhl & Gray (1966)</span></span></span></label>
+<select id="s-baffle-type" onchange="update()">
+  <option value="none">Unbaffled</option>
+  <option value="std" selected>Standard (4 baffles, w=T/10, full height)</option>
+  <option value="custom">Custom</option>
+</select></div>
+<div id="s-baffle-custom" style="display:none">
+  <div class="fr3">
+    <div class="f"><label>No. baffles</label><input type="number" id="s-bn" value="4" min="1" max="8" step="1" oninput="update()"></div>
+    <div class="f"><label>Width w (m)</label><input type="number" id="s-bw" value="0.015" min="0.001" max="1" step="0.001" oninput="update()"></div>
+    <div class="f"><label>Height frac.</label><input type="number" id="s-bh" value="1.0" min="0.1" max="1.0" step="0.05" oninput="update()"></div>
+  </div>
+</div>
+<div class="f"><label>Bottom shape</label>
+<select id="s-bottom" onchange="update()">
+  <option value="flat">Flat</option><option value="dished">Dished / elliptical</option><option value="cone">Conical</option>
+</select></div>
+<div style="margin-top:8px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <span style="font-size:11px;font-weight:600;color:var(--muted)">Internal obstructions</span>
+    <span class="tip" style="margin-left:4px"><span class="ti">i</span><span class="tb r"><span class="tt">Internal obstructions</span>Reduce effective mixing volume and can act as pseudo-baffles. Volume fraction is fraction of tank volume displaced.<span class="tcite">Grenville & Nienow (2004) Handbook of Industrial Mixing Ch.9</span></span></span>
+  </div>
+  <div id="s-obs-list"></div>
+  <button class="btn-add" onclick="addObs('s')">+ Add obstruction</button>
+</div>
+</div>
+</div>
+
+<!-- LARGE SCALE -->
+<div class="section">
+<div class="section-title">Large-scale tank</div>
+<div class="tank-block" style="border-color:#e8c870">
+<div class="tlabel-l">Large scale — Pilot / Production</div>
+<div class="fr">
+  <div class="f"><label>Tank dia. T (m)</label><input type="number" id="l-T" value="1.5" min="0.01" max="50" step="0.1" oninput="update()"></div>
+  <div class="f"><label>Liquid height H (m)</label><input type="number" id="l-H" value="1.8" min="0.01" max="50" step="0.1" oninput="update()"></div>
+</div>
+<div class="fr">
+  <div class="f"><div class="cl">Volume V (L)</div><div class="cf" id="l-vol">—</div></div>
+  <div class="f"><div class="cl">Mass m (kg)</div><div class="cf" id="l-mass">—</div></div>
+</div>
+<div class="fr">
+  <div class="f"><label>Impeller dia. D (m)</label><input type="number" id="l-D" value="0.6" min="0.01" max="20" step="0.05" oninput="update()"></div>
+  <div class="f"><label>Speed N (rpm)</label><input type="number" id="l-N" value="60" min="1" max="1000" step="1" oninput="update()"></div>
+</div>
+<div class="fr">
+  <div class="f"><label>Off-bottom C (m)</label><input type="number" id="l-C" value="0.5" min="0.01" max="20" step="0.05" oninput="update()"></div>
+  <div class="f"><label>No. impellers</label><input type="number" id="l-nimp" value="1" min="1" max="4" step="1" oninput="update()"></div>
+</div>
+<div class="f"><label>Impeller type</label>
+<select id="l-imp" onchange="update()">
+  <option value="rushton">Rushton (radial, high shear)</option>
+  <option value="ptb">Pitched-blade 45° (axial)</option>
+  <option value="hydrofoil">Hydrofoil (axial, low shear)</option>
+  <option value="propeller">Marine propeller</option>
+  <option value="anchor">Anchor / gate (laminar only)</option>
+</select></div>
+<div class="f"><label>Baffle config</label>
+<select id="l-baffle-type" onchange="update()">
+  <option value="none">Unbaffled</option>
+  <option value="std" selected>Standard (4 baffles, w=T/10, full height)</option>
+  <option value="custom">Custom</option>
+</select></div>
+<div id="l-baffle-custom" style="display:none">
+  <div class="fr3">
+    <div class="f"><label>No. baffles</label><input type="number" id="l-bn" value="4" min="1" max="8" step="1" oninput="update()"></div>
+    <div class="f"><label>Width w (m)</label><input type="number" id="l-bw" value="0.15" min="0.001" max="5" step="0.01" oninput="update()"></div>
+    <div class="f"><label>Height frac.</label><input type="number" id="l-bh" value="1.0" min="0.1" max="1.0" step="0.05" oninput="update()"></div>
+  </div>
+</div>
+<div class="f"><label>Bottom shape</label>
+<select id="l-bottom" onchange="update()">
+  <option value="flat">Flat</option><option value="dished">Dished / elliptical</option><option value="cone">Conical</option>
+</select></div>
+<div style="margin-top:8px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <span style="font-size:11px;font-weight:600;color:var(--muted)">Internal obstructions</span>
+  </div>
+  <div id="l-obs-list"></div>
+  <button class="btn-add" onclick="addObs('l')">+ Add obstruction</button>
+</div>
+</div>
+</div>
+
+<!-- SCALE-UP GOAL -->
+<div class="section">
+<div class="section-title">Scale-up goal</div>
+<div class="f"><label>Primary criterion</label>
+<select id="scaleup-goal" onchange="update()" style="height:auto;padding:6px 7px">
+  <option value="pv">Equal P/V — same energy input per volume</option>
+  <option value="tipspeed">Equal tip speed — same max impeller shear</option>
+  <option value="re">Equal Reynolds number — same flow regime</option>
+  <option value="blendtime">Equal blend time — same homogenization time</option>
+  <option value="njs">Equal Njs — same particle suspension</option>
+  <option value="fr">Equal Froude number — same surface/gravity forces</option>
+</select></div>
+<div id="goal-desc" style="font-size:11px;color:#0d3f6e;background:var(--blue-light);border:1px solid #aacfee;border-radius:6px;padding:8px 10px;line-height:1.55;margin-top:4px"></div>
+</div>
+</div><!-- end sidebar -->
+
+<!-- MAIN PANEL -->
+<div class="main">
+
+<!-- N Recommendation callout -->
+<div id="n-rec-callout" style="display:none"></div>
+
+<!-- Geo score -->
+<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px">
+<div class="ghdr">
+  <div>
+    <h2 style="margin-bottom:2px">Geometric similarity score <span class="tip"><span class="ti">i</span><span class="tb"><span class="tt">Geometric similarity score</span>0–100 comparing D/T, H/T, C/T, impeller type, baffle w/T. ≥80: similar. 60–79: partial. &lt;60: some criteria locked.<span class="tcite">Paul et al. (2004) Handbook of Industrial Mixing Ch.12</span><span class="tv">⚠ Criteria requiring geometric similarity locked when score &lt; 60.</span></span></span></span></h2>
+    <div style="font-size:11px;color:var(--muted)">D/T, H/T, C/T, impeller type, baffle w/T, obstruction loading</div>
+  </div>
+  <div style="text-align:right"><div class="gsn" id="geo-val">—</div><div id="geo-badge"></div></div>
+</div>
+<div class="geo-bar"><div class="geo-fill" id="geo-fill" style="width:0%"></div></div>
+<div id="geo-details" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+<div id="geo-warns"></div>
+</div>
+
+<!-- Tank diagrams -->
+<div class="vpair">
+  <div class="vbox">
+    <div class="vlbl" style="color:var(--blue)">Small scale</div>
+    <svg id="svg-s" width="180" height="220" style="display:block;margin:0 auto"></svg>
+    <div id="info-s" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+  </div>
+  <div class="vbox">
+    <div class="vlbl" style="color:var(--amber)">Large scale</div>
+    <svg id="svg-l" width="180" height="220" style="display:block;margin:0 auto"></svg>
+    <div id="info-l" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('params',this)">Parameters</button>
+  <button class="tab" onclick="showTab('scaleup',this)">Scale-Up</button>
+  <button class="tab" onclick="showTab('feasibility',this)">Feasibility</button>
+  <button class="tab" onclick="showTab('tradeoff',this)">Trade-offs</button>
+  <button class="tab" onclick="showTab('heattx',this)">Heat Transfer</button>
+  <button class="tab" onclick="showTab('sensitivity',this)">Sensitivity</button>
+  <button class="tab" onclick="showTab('power',this)">Power & Motor</button>
+</div>
+
+<div id="tab-params" class="tab-panel active">
+  <div style="background:#f8f7f4;border:1px solid var(--border);border-radius:7px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:var(--muted);line-height:1.55">
+    <b style="color:#1a1a1a">Reading this tab:</b> Blue = small scale, amber = large scale. Ratio pill color: <span class="rpill rg" style="font-size:10px">×1.0 matched</span> <span class="rpill ra" style="font-size:10px">amber moderate</span> <span class="rpill rr" style="font-size:10px">red large mismatch</span>. Cards highlighted in blue are most relevant to the active process context. Hover <b>ℹ</b> for definitions, validity, and citations.
+  </div>
+  <div id="global-warns"></div>
+  <div id="da-panel"></div>
+  <div class="pgrid" id="pgrid"></div>
+  <div id="spacing-warn"></div>
+  <div id="regime-summ"></div>
+</div>
+<div id="tab-scaleup" class="tab-panel">
+  <div style="background:#f8f7f4;border:1px solid var(--border);border-radius:7px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:var(--muted);line-height:1.55">
+    <b style="color:#1a1a1a">Reading this tab:</b> Highlighted row = selected criterion. "Rec. N_L" = agitator speed needed at large scale to exactly match that criterion. Compare to your actual N. <span class="badge b-ok">Valid</span> applicable. <span class="badge b-w">Warning</span> use with caution. <span class="badge b-e">Locked</span> not applicable. No single criterion matches everything — use Trade-offs tab.
+  </div>
+  <div id="scaleup-content"></div>
+</div>
+<div id="tab-feasibility" class="tab-panel"><div id="feasibility-content"></div></div>
+<div id="tab-tradeoff" class="tab-panel"><div id="tradeoff-content"></div></div>
+<div id="tab-heattx" class="tab-panel"><div id="heattx-content"></div></div>
+<div id="tab-sensitivity" class="tab-panel"><div id="sensitivity-content"></div></div>
+<div id="tab-power" class="tab-panel"><div id="power-content"></div></div>
+</div><!-- end main -->
+</div><!-- end app -->
+<script>
+// ===== LOOKUP TABLES =====
+const Np_map={rushton:5.0,ptb:1.37,hydrofoil:0.30,propeller:0.35,anchor:0.35};
+const ks_map={rushton:11.5,ptb:13.0,hydrofoil:10.0,propeller:11.5,anchor:300};
+const NQ_map={rushton:0.72,ptb:0.79,hydrofoil:0.79,propeller:0.75,anchor:0.20};
+const flow_map={rushton:'radial',ptb:'axial',hydrofoil:'axial',propeller:'axial',anchor:'axial'};
+const imp_lbl={rushton:'Rushton RT',ptb:'Pitched Blade 45°',hydrofoil:'Hydrofoil',propeller:'Marine Propeller',anchor:'Anchor/Gate'};
+// Flooding constant CD — Nienow (1996)
+const CD_map={rushton:30,ptb:25,hydrofoil:20,propeller:20,anchor:10};
+
+let s_obs=[],l_obs=[],obs_id=0,activeCtx='general';
+
+// ===== CONTEXT DEFINITIONS =====
+const CTX={
+  general:{label:'General / blending',desc:'Optimise for bulk homogeneity. Blend time and circulation time are the primary metrics. P/V is the most common scale-up criterion.',goal:'pv',highlight:['Blend time θ_m','Circulation time','P/V'],sections:[],hasGas:false,hasRxn:false,hasHT:false},
+  gasliq:{label:'Gas-liquid (aerated)',desc:'Gas dispersion and O₂ transfer rate (k_La) drive the process. Flooding and loading transitions must be avoided. P/V on gassed power is the primary criterion — note gassed P/V ≈ 0.4–0.7× ungassed.',goal:'pv',highlight:['k_La','P/V','Tip speed','Froude'],sections:['sec-gas'],hasGas:true,hasRxn:false,hasHT:false},
+  solidliq:{label:'Solid-liquid suspension',desc:'Must operate at or above N_js to keep particles in suspension. Equal N_js is the appropriate scale-up criterion. C/T is critical — check geometric similarity on clearance.',goal:'njs',highlight:['Njs','C/T','P/V','Tip speed'],sections:['sec-sol'],hasGas:false,hasRxn:false,hasHT:false},
+  threephase:{label:'3-phase (gas + solid + liquid)',desc:'Constraint mode: three simultaneous requirements — N ≥ N_js (suspension), k_La × C* ≥ OTR (transfer), and N ≤ N_flood (no flooding). The Feasibility tab shows the valid operating window. Use highest-constraint N with available margin.',goal:'pv',highlight:['Njs','k_La','P/V','Tip speed','Froude'],sections:['sec-gas','sec-sol'],hasGas:true,hasRxn:false,hasHT:false},
+  shear:{label:'Shear-sensitive',desc:'Tip speed limits mechanical damage to cells, crystals, or fragile structures. Keep tip speed ≤ process-specific limit. Equal tip speed is the scale-up criterion. Monitor Kolmogorov scale vs particle/cell size.',goal:'tipspeed',highlight:['Tip speed','Kolmogorov scale','P/V'],sections:[],hasGas:false,hasRxn:false,hasHT:false},
+  heattx:{label:'Heat transfer limited',desc:'Heat removal capacity (∝T²) grows slower than heat generation (∝T³) on scale-up. Jacket/coil area may become the binding constraint at large scale. Check Heat Transfer tab for feasibility.',goal:'pv',highlight:['P/V','Blend time θ_m'],sections:['sec-ht'],hasGas:false,hasRxn:false,hasHT:true},
+};
+
+function setCtx(key,el){
+  activeCtx=key;
+  document.querySelectorAll('.ctx-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const cfg=CTX[key];
+
+  // Show/hide sidebar sections
+  ['sec-gas','sec-sol','sec-ht','sec-da'].forEach(s=>{
+    const el2=document.getElementById(s);
+    if(el2) el2.style.display='none';
+  });
+  document.getElementById('sec-da').style.display='block';
+  (cfg.sections||[]).forEach(s=>{
+    const el2=document.getElementById(s);
+    if(el2) el2.style.display='block';
+  });
+
+  // Show/hide gas-related output param cards (k_La, P/V gassed, Froude)
+  document.querySelectorAll('.gas-only-field').forEach(el2=>{
+    el2.style.display=cfg.hasGas?'':'none';
+  });
+  // Show/hide reaction-related output (Da panel)
+  document.querySelectorAll('.rxn-only-field').forEach(el2=>{
+    el2.style.display=cfg.hasRxn?'':'none';
+  });
+  // Re-render obs cards to show/hide heat fluid fields
+  renderObs('s');renderObs('l');
+
+  document.getElementById('ctx-desc').innerHTML=cfg.desc;
+  document.getElementById('scaleup-goal').value=cfg.goal;
+  update();
+}
+
+function toggleRxn(){
+  const on=document.getElementById('has-rxn').checked;
+  document.getElementById('rxn-inputs').style.display=on?'block':'none';
+  update();
+}
+
+function toggleElec(){
+  document.getElementById('elec-s-inputs').style.display=document.getElementById('has-elec-s').checked?'block':'none';
+  document.getElementById('elec-l-inputs').style.display=document.getElementById('has-elec-l').checked?'block':'none';
+  update();
+}
+const OBS_TYPES={
+  coil_wall:{
+    label:'Wall cooling coil (helical)',
+    role:'cool',
+    desc:'Helical coil of pipe mounted near the tank wall, running most of the liquid height.',
+    calc_effects:'<b>Volume:</b> Pipe cross-section × coil length displaces fluid. Typical coil reduces effective volume by 1–5%. <b>Baffling:</b> Acts as a pseudo-baffle — the coil body disrupts tangential flow and increases the effective power number Np by ~10% (pseudo_baffle factor applied). <b>Heat transfer:</b> Outer pipe surface area = N_turns × π × D_coil × π × d_pipe contributes to total HX area in heat transfer calculations.',
+    fields:['coil_od','coil_pipe_d','coil_turns'],
+    field_labels:['Coil c/l dia. (m)','Pipe o.d. (m)','No. turns'],
+    pseudo_baffle:true
+  },
+  coil_full:{
+    label:'Full-tank cooling coil',
+    role:'cool',
+    desc:'Large-diameter helical coil occupying most of the tank cross-section, spanning a defined height zone.',
+    calc_effects:'<b>Volume:</b> More pipe length than wall coil — volume displacement can reach 3–8%. <b>Baffling:</b> Strong pseudo-baffle effect; multiple coil passes redistribute radial flow and significantly increase Np (~10% correction applied). <b>Heat transfer:</b> Large surface area; effective especially when jacket alone is insufficient at scale. <b>Note:</b> Can interfere with impeller discharge if coil inner diameter approaches impeller swept diameter — check coil OD &gt; D_impeller.',
+    fields:['coil_od','coil_height','coil_pipe_d','coil_turns'],
+    field_labels:['Coil overall dia. (m)','Coil height (m)','Pipe o.d. (m)','No. turns'],
+    pseudo_baffle:true
+  },
+  heat_coil_wall:{
+    label:'Wall heating coil (helical)',
+    role:'heat',
+    desc:'Helical coil carrying hot fluid (steam, hot water, oil) near the tank wall for heating.',
+    calc_effects:'<b>Volume & baffling:</b> Same as cooling wall coil — displaces 1–5% volume, pseudo-baffle Np correction applies. <b>Heat transfer:</b> Surface area counted as heating area in heat transfer tab. Driving force is (T_fluid_in − T_process). Steam coils: use steam condensing temperature for inlet.',
+    fields:['coil_od','coil_pipe_d','coil_turns','fluid_t_in'],
+    field_labels:['Coil c/l dia. (m)','Pipe o.d. (m)','No. turns','Fluid inlet T (°C)'],
+    pseudo_baffle:true
+  },
+  heat_coil_full:{
+    label:'Full-tank heating coil',
+    role:'heat',
+    desc:'Large-diameter helical heating coil spanning most of the tank, used for rapid heat-up or temperature maintenance.',
+    calc_effects:'<b>Volume & baffling:</b> Same as full cooling coil — 3–8% volume displacement, strong pseudo-baffle correction. <b>Heat transfer:</b> Large area; driving force is (T_fluid_in − T_process). High flux at startup when ΔT is large, falling off as process approaches set-point.',
+    fields:['coil_od','coil_height','coil_pipe_d','coil_turns','fluid_t_in'],
+    field_labels:['Coil overall dia. (m)','Coil height (m)','Pipe o.d. (m)','No. turns','Fluid inlet T (°C)'],
+    pseudo_baffle:true
+  },
+  sparger:{
+    label:'Sparger / gas distributor',
+    role:'neutral',
+    desc:'Ring or pipe sparger mounted below the impeller for gas introduction.',
+    calc_effects:'<b>Volume:</b> Minor displacement — sparger pipe and ring body contribute &lt;0.5% volume in most cases. <b>Baffling:</b> No pseudo-baffle effect; gas bubbles rising past the sparger do create some flow disruption but this is captured in the gassed power correlation, not the Np correction. <b>Gas distribution:</b> Sparger diameter should be ≤ D_impeller for good initial dispersion — gas released further from impeller requires more N to disperse.',
+    fields:['sparger_d','sparger_pos'],
+    field_labels:['Sparger ring dia. (m)','Height from bottom (frac H)'],
+    pseudo_baffle:false
+  },
+  probe:{
+    label:'Probe / dip tube / sensor',
+    role:'neutral',
+    desc:'Vertical probe, thermowell, pH sensor, or sampling tube inserted from above.',
+    calc_effects:'<b>Volume:</b> Very minor — a 20mm probe at 80% insertion displaces &lt;0.1% volume in most tanks. <b>Baffling:</b> Negligible unless probe diameter is &gt;T/20 — single thin probes do not meaningfully alter flow. <b>Multiple probes:</b> Add one entry per probe if several are present and combined cross-section is significant.',
+    fields:['probe_d','probe_depth'],
+    field_labels:['Probe dia. (m)','Insertion depth (frac H)'],
+    pseudo_baffle:false
+  },
+  heat_plate:{
+    label:'Internal heat transfer plate',
+    role:'cool',
+    desc:'Flat or profiled vertical plate carrying coolant or heating fluid, mounted internally.',
+    calc_effects:'<b>Volume:</b> Plate thickness (~12mm typical) × width × height — can displace 1–4% volume for large plates. <b>Baffling:</b> Significant pseudo-baffle — vertical plates act similarly to standard baffles and substantially redirect flow; Np correction applied. <b>Heat transfer:</b> Both faces contribute to HX area (2 × width × height). Most effective when positioned in the high-velocity impeller discharge stream.',
+    fields:['plate_w_frac','plate_h_frac'],
+    field_labels:['Plate width (frac T)','Plate height (frac H)'],
+    pseudo_baffle:true
+  },
+};
+
+function addObs(sc){
+  const arr=sc==='s'?s_obs:l_obs;
+  const T=+document.getElementById(sc+'-T').value;
+  const id=++obs_id;
+  arr.push({id,type:'coil_wall',T,
+    coil_od:+(T*0.8).toFixed(3),coil_pipe_d:0.025,coil_turns:5,
+    coil_height:+(T*0.7).toFixed(3),
+    sparger_d:+(T*0.6).toFixed(3),sparger_pos:0.05,
+    probe_d:0.02,probe_depth:0.8,
+    plate_w_frac:0.15,plate_h_frac:0.8,
+    fluid_t_in:80
+  });
+  renderObs(sc);update();
+}
+function removeObs(sc,id){if(sc==='s')s_obs=s_obs.filter(o=>o.id!==id);else l_obs=l_obs.filter(o=>o.id!==id);renderObs(sc);update();}
+function updateObsField(sc,id,f,v){const a=sc==='s'?s_obs:l_obs;const o=a.find(x=>x.id===id);if(o)o[f]=isNaN(+v)?v:+v;update();}
+function changeObsType(sc,id,type){
+  const a=sc==='s'?s_obs:l_obs;const o=a.find(x=>x.id===id);if(!o)return;
+  o.type=type;
+  const T=+document.getElementById(sc+'-T').value;
+  o.coil_od=+(T*0.8).toFixed(3);o.coil_height=+(T*0.7).toFixed(3);o.sparger_d=+(T*0.6).toFixed(3);
+  renderObs(sc);update();
+}
+
+function renderObs(sc){
+  const arr=sc==='s'?s_obs:l_obs;
+  const isHT=CTX[activeCtx]&&CTX[activeCtx].hasHT;
+  document.getElementById(sc+'-obs-list').innerHTML=arr.map(o=>{
+    const cfg=OBS_TYPES[o.type];
+    // Build fields HTML — skip fluid_t_in unless heat transfer context active
+    const fh=cfg.fields
+      .filter(f=>f!=='fluid_t_in'||isHT)
+      .map((f,i)=>{
+        const li=cfg.fields.indexOf(f);
+        return `<div class="f"><label>${cfg.field_labels[li]}</label><input type="number" value="${o[f]!=null?o[f]:''}" step="0.001" min="0" oninput="updateObsField('${sc}',${o.id},'${f}',this.value)" style="height:26px;font-size:11px"></div>`;
+      }).join('');
+    const roleTag=cfg.role==='cool'?'<span class="badge b-i" style="font-size:9px">cooling</span>':cfg.role==='heat'?'<span class="badge" style="font-size:9px;background:#FFF0E0;color:#9A4500">heating</span>':'';
+    return `<div class="obs-card">
+      <div class="obs-hdr">
+        <span style="font-size:12px;font-weight:600">${cfg.label} ${roleTag}</span>
+        <button class="btn-rm" onclick="removeObs('${sc}',${o.id})">✕</button>
+      </div>
+      <div class="f"><select onchange="changeObsType('${sc}',${o.id},this.value)" style="height:26px;font-size:11px">
+        ${Object.entries(OBS_TYPES).map(([k,v])=>`<option value="${k}"${k===o.type?' selected':''}>${v.label}</option>`).join('')}
+      </select></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:5px;line-height:1.4">${cfg.desc}</div>
+      <details style="margin-bottom:6px">
+        <summary style="font-size:10px;color:var(--blue);cursor:pointer;user-select:none">How this affects calculations</summary>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;padding:6px 8px;background:#f8f8f6;border-radius:5px">${cfg.calc_effects}</div>
+      </details>
+      <div class="fr">${fh}</div>
+    </div>`;
+  }).join('');
+}
+
+function calcObsVF(obs,T,H){
+  let vf=0,pb=false;
+  const Vt=Math.PI/4*T*T*H;
+  for(const o of obs){
+    if(OBS_TYPES[o.type].pseudo_baffle) pb=true;
+    const type=o.type;
+    if(type==='coil_wall'||type==='coil_full'||type==='heat_coil_wall'||type==='heat_coil_full'){
+      const d=o.coil_od||T*0.8,pd=o.coil_pipe_d||0.025,turns=o.coil_turns||5;
+      vf+=Math.PI/4*pd*pd*(turns*Math.PI*d)/Vt;
+    } else if(type==='sparger'){
+      vf+=(Math.PI*(o.sparger_d||T*0.6)*0.03*0.005)/Vt;
+    } else if(type==='probe'){
+      vf+=(Math.PI/4*(o.probe_d||0.02)**2*(o.probe_depth||0.8)*H)/Vt;
+    } else if(type==='heat_plate'){
+      vf+=((o.plate_w_frac||0.15)*T*(o.plate_h_frac||0.8)*H*0.012)/Vt;
+    }
+  }
+  return{vf:Math.min(vf,0.4),pb};
+}
+
+// ===== CORE CALCULATIONS =====
+function getBaffle(sc){
+  const T=+document.getElementById(sc+'-T').value;
+  const bt=document.getElementById(sc+'-baffle-type').value;
+  if(bt==='none') return{n:0,w:0,h_frac:1,T,type:'none'};
+  if(bt==='std') return{n:4,w:T/10,h_frac:1,T,type:'std'};
+  return{n:+document.getElementById(sc+'-bn').value,w:+document.getElementById(sc+'-bw').value,h_frac:+document.getElementById(sc+'-bh').value,T,type:'custom'};
+}
+
+function getNp(imp,Re,baffle){
+  let Np=Np_map[imp];
+  if(baffle.n===0&&Re>1000) Np*=0.3;
+  else if(baffle.w<baffle.T/20&&baffle.n>0) Np*=0.7;
+  if(Re<10) Np=imp==='anchor'?300/Re:Math.min(Np,50/Re);
+  else if(Re<100) Np=Np*(Re/100)+(50/Re)*(1-Re/100);
+  return Math.max(Np,0.01);
+}
+
+function calcKla(N, D, P, V, Qg_m3s, rho){
+  // van't Riet (1979): k_La = C * (P/V)^a * (u_s)^b
+  // For coalescent (water-like): C=0.026, a=0.4, b=0.5
+  // For non-coalescent (ionic): C=0.002, a=0.7, b=0.2 — use coalescent as default
+  const us = Qg_m3s / (Math.PI/4 * (D*3)**2); // superficial velocity through tank cross-section (approx T≈3D)
+  const kla = 0.026 * Math.pow(Math.max(P/V,0.01), 0.4) * Math.pow(Math.max(us,1e-5), 0.5);
+  return kla * 3600; // convert to h⁻¹
+}
+
+function calcNflood(imp, N, D, T, Qg_m3s){
+  // Flooding criterion: Fl_g > CD * (D/T)^3.5 * Fr — Nienow (1996)
+  // Fl_g = Q_g / (N*D^3), Fr = N^2*D/g
+  // At flood: Fl_g_flood = CD*(D/T)^3.5 * Fr
+  // Rearranging for N_flood... iterative, use simpler Bakker/Nienow:
+  // N_flood such that Fl_g = CD*(D/T)^3.5*(N^2*D/g)
+  const CD = CD_map[imp]||30;
+  // Q_g/(N*D^3) = CD*(D/T)^3.5*N^2*D/g  => Q_g = CD*(D/T)^3.5*N^3*D^4/g
+  // N_flood = (Q_g * g / (CD * (D/T)^3.5 * D^4))^(1/3)
+  const Nf = Math.pow(Qg_m3s*9.81/(CD*Math.pow(D/T,3.5)*Math.pow(D,4)),1/3);
+  return Nf*60; // rpm
+}
+
+function getInputs(sc){
+  const T=+document.getElementById(sc+'-T').value;
+  const H=+document.getElementById(sc+'-H').value;
+  const D=+document.getElementById(sc+'-D').value;
+  const C=+document.getElementById(sc+'-C').value;
+  const N_rpm=+document.getElementById(sc+'-N').value;
+  const N=N_rpm/60;
+  const imp=document.getElementById(sc+'-imp').value;
+  const nimp=+document.getElementById(sc+'-nimp').value;
+  const bottom=document.getElementById(sc+'-bottom').value;
+  const rho=+document.getElementById('density').value;
+  const ft=document.getElementById('fluid-type').value;
+  let mu=+document.getElementById('viscosity').value*1e-3;
+  const ni=+document.getElementById('n-index').value;
+  const Kc=+document.getElementById('K-consist').value;
+  const tau0=+document.getElementById('tau0').value;
+  const baffle=getBaffle(sc);
+  const obs=sc==='s'?s_obs:l_obs;
+  const{vf,pb}=calcObsVF(obs,T,H);
+
+  // Metzner-Otto
+  if(ft!=='newtonian'){
+    const sr=ks_map[imp]*N;
+    mu=ft==='powerlaw'?Kc*Math.pow(sr,ni-1):(tau0/sr)+Kc;
+    mu=Math.max(mu,1e-6);
+  }
+
+  // Krieger-Dougherty slurry viscosity correction (solids context)
+  const xSol=+document.getElementById('x-sol').value/100||0.05;
+  const rhop=+document.getElementById('rho-p').value||1500;
+  const phi=xSol*rho/rhop; // volume fraction solids
+  if((activeCtx==='solidliq'||activeCtx==='threephase')&&phi>0){
+    const phimax=0.63; // max packing
+    const KD_visc=mu*Math.pow(1-phi/phimax,-2.5*phimax);
+    mu=Math.min(KD_visc,mu*10);
+    // Slurry effective density
+    // rho_sl = rho*(1-phi) + rhop*phi -- use below
+  }
+
+  let Vbot=0;
+  if(bottom==='dished') Vbot=0.0847*T**3;
+  else if(bottom==='cone') Vbot=(Math.PI/12)*T*T*(T*0.5);
+  const Vgross=Math.PI/4*T*T*H+Vbot;
+  const Vliq=Vgross*(1-vf);
+
+  const Re=rho*N*D*D/mu;
+  const Fr=N*N*D/9.81;
+  const Np_val=getNp(imp,Re,baffle)*(pb?1.1:1.0);
+  const P1=Np_val*rho*N**3*D**5;
+  const P=P1*nimp;
+  const PV=P/Vliq;
+  const tip=Math.PI*D*N;
+  const NQ=NQ_map[imp];
+  const Q=NQ*N*D**3*nimp;
+  const circ=Vliq/Q;
+  const blend=Re>10000?5.9*(T/D)**2/(N*(D/T)**(1/3)):null;
+  const shear=ks_map[imp]*N;
+  const eps=PV/rho;
+  const nu=mu/rho;
+  const lK=Math.pow(nu**3/Math.max(eps,1e-20),0.25)*1e6;
+
+  // Zwietering Njs with dp, X, rho_p from inputs
+  const dp_m=(+document.getElementById('dp').value||200)*1e-6;
+  const X_w=+document.getElementById('x-sol').value||5;
+  const drho=Math.max(rhop-rho,1);
+  const C_D_ratio=C/D;
+  const S_z=Math.min(13,Math.max(4,5.9*Math.pow(Math.max(C_D_ratio,0.1),0.3)));
+  const Njs=S_z*Math.pow(nu,0.1)*Math.pow(dp_m*9.81*drho/rho,0.45)*Math.pow(X_w/100,0.13)*Math.pow(D,-0.85);
+
+  // Gas-liquid
+  const vvm_id=sc==='s'?'vvm-s':'vvm-l';
+  const vvm=+document.getElementById(vvm_id).value||1.0;
+  const Qg_m3s=vvm*Vliq/60; // m³/s
+  const us_g=Qg_m3s/(Math.PI/4*T*T);
+  const kla=calcKla(N,D,P/Vliq,Vliq,Qg_m3s,rho); // h⁻¹
+  const Nflood_rpm=calcNflood(imp,N,D,T,Qg_m3s);
+  const Nflood=Nflood_rpm/60;
+  const flooded=(N>Nflood*1.05);
+  const loaded=(N>Nflood*0.7&&N<=Nflood*1.05);
+
+  // Gassed power (Michel-Miller correlation)
+  const P_gassed=flooded?P*0.3:P*Math.max(0.35,Math.min(1,0.56*Math.pow((P**2*N*D**3/Qg_m3s**0.56),0.08)/P));
+
+  // C* dissolved O2 at saturation ~0.21 mmol/L (air, 37°C)
+  const Cstar=0.21; // mmol/L at 37°C, 1 atm
+  const OTR_max=kla*Cstar; // mmol/L/h at driving force = C*
+
+  const gas_risk=Fr>0.1?'high':Fr>0.04?'moderate':'low';
+  let cav=null;
+  if(tau0>0&&ft==='bingham'){const ti2=0.5*P1/(Math.PI*(D/2)**3);cav=D/T*Math.pow(ti2/tau0,1/3);}
+  const wT=baffle.n>0?baffle.w/T:0;
+
+  return{T,H,D,C,N,N_rpm,imp,nimp,baffle,bottom,rho,mu,ni,Kc,tau0,
+    Re,Fr,Np:Np_val,P1,P,PV,P_gassed,tip,Q,circ,blend,shear,eps,lK,
+    Njs,gas_risk,Vliq,Vgross,vf,pb,cav,ft,wT,nu,kla,Qg_m3s,us_g,
+    Nflood_rpm,flooded,loaded,OTR_max,phi,S_z,dp_m,X_w,vvm};
+}
+
+function getRegime(Re){
+  if(Re>10000)return{label:'Turbulent',cls:'rt',color:'#3B6D11'};
+  if(Re>100)return{label:'Transitional',cls:'rtn',color:'#854F0B'};
+  return{label:'Laminar',cls:'rl',color:'#A32D2D'};
+}
+
+function geoScore(s,l){
+  let sc=100;const items=[];
+  const push=(n,sv,lv,w)=>{const dev=Math.min(Math.abs(lv/sv-1),1);sc-=dev*w;items.push({n,sv:sv.toFixed(3),lv:lv.toFixed(3),dev});};
+  push('D/T',s.D/s.T,l.D/l.T,30);
+  push('H/T',s.H/s.T,l.H/l.T,15);
+  push('C/T',s.C/s.T,l.C/l.T,15);
+  push('w/T',Math.max(s.wT,0.001),Math.max(l.wT,0.001),10);
+  if(s.imp!==l.imp) sc-=30;
+  if((s.baffle.n===0)!==(l.baffle.n===0)) sc-=15;
+  sc-=Math.min(Math.abs(s.vf-l.vf)*200,10);
+  return{score:Math.max(0,Math.round(sc)),items};
+}
+
+function fmt(x,d=2){
+  if(x===null||x===undefined||isNaN(x)||!isFinite(x))return'—';
+  if(Math.abs(x)>=10000)return x.toExponential(2);
+  if(Math.abs(x)>=10)return x.toFixed(Math.min(d,1));
+  if(Math.abs(x)>=1)return x.toFixed(d);
+  if(Math.abs(x)>=0.001)return x.toFixed(3);
+  return x.toExponential(2);
+}
+
+// ===== DRAWING =====
+function drawTank(svgId,p,sc){
+  const svg=document.getElementById(svgId);
+  const W=180,SH=220,col=sc==='s'?'#185FA5':'#BA7517';
+  const lc=sc==='s'?'rgba(24,95,165,0.07)':'rgba(186,117,23,0.07)';
+  const bc='#EF9F27';
+  const ml=18,mr=22,mt=22,mb=35;
+  const asp=Math.min(p.H/p.T,3.5);
+  let tw=W-ml-mr,th=Math.min(tw*asp,SH-mt-mb);
+  if(th===SH-mt-mb)tw=th/asp;
+  tw=Math.max(tw,30);th=Math.max(th,30);
+  const tx=(W-tw)/2,ty=mt,cx=W/2;
+  const Dpx=Math.min((p.D/p.T)*tw,tw*0.95);
+
+  let be=0,bsvg='';
+  if(p.bottom==='dished'){be=tw*0.08;bsvg=`<path d="M${tx} ${ty+th} Q${cx} ${ty+th+be*2} ${tx+tw} ${ty+th}" fill="none" stroke="${col}" stroke-width="1.5"/>`;}
+  else if(p.bottom==='cone'){be=tw*0.1;bsvg=`<path d="M${tx} ${ty+th} L${cx} ${ty+th+be*2} L${tx+tw} ${ty+th}" fill="none" stroke="${col}" stroke-width="1.5"/>`;}
+
+  // Baffles — inward from wall
+  let baff='';
+  if(p.baffle.n>0){
+    const bw=Math.max((p.baffle.w/p.T)*tw,2.5);
+    const bh=th*(p.baffle.h_frac||1);
+    baff=`<rect x="${tx}" y="${ty+th-bh}" width="${bw}" height="${bh}" fill="${bc}" opacity="0.75" rx="1"/>
+          <rect x="${tx+tw-bw}" y="${ty+th-bh}" width="${bw}" height="${bh}" fill="${bc}" opacity="0.75" rx="1"/>`;
+  }
+
+  // Impellers at C clearance
+  const Cfrac=Math.min(Math.max((p.C||p.T/3)/p.H,0.04),0.70);
+  const nimp=p.nimp||1;
+  let impsvg='';
+  for(let i=0;i<Math.min(nimp,3);i++){
+    const sp=nimp>1?Math.min(0.28,(0.65-Cfrac)/(nimp-1)):0;
+    const iy=ty+th*(1-Cfrac-i*sp);
+    impsvg+=drawImp(p.imp,cx,iy,Dpx,col);
+  }
+  const shaft_y=ty+th*(1-Cfrac);
+  const shaft=`<line x1="${cx}" y1="${ty}" x2="${cx}" y2="${shaft_y}" stroke="${col}" stroke-width="2" stroke-dasharray="4 3" opacity="0.5"/>`;
+
+  // Obstructions
+  let obs='';
+  const olist=sc==='s'?s_obs:l_obs;
+  for(const o of olist){
+    if(o.type==='coil_wall'||o.type==='heat_coil_wall'){
+      const isHeat=o.type==='heat_coil_wall';
+      const coilCol=isHeat?'#E05020':'#378ADD';
+      const x2=tx+tw-6,turns=Math.min(o.coil_turns||5,8),sp2=th*0.7/Math.max(turns,1),y0=ty+th*0.15;
+      let pts='';for(let j=0;j<=turns;j++){const y=y0+j*sp2;const x=j%2===0?x2-8:x2+1;pts+=(j===0?'M':'L')+x+' '+y;}
+      obs+=`<path d="${pts}" fill="none" stroke="${coilCol}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+      obs+=`<text x="${x2-2}" y="${ty+th*0.1}" font-size="8" fill="${coilCol}" text-anchor="end">${isHeat?'heat':'cool'}</text>`;
+    } else if(o.type==='coil_full'||o.type==='heat_coil_full'){
+      const isHeat=o.type==='heat_coil_full';
+      const coilCol=isHeat?'#E05020':'#378ADD';
+      const cd=(o.coil_od||p.T*0.8),ch=(o.coil_height||p.H*0.7);
+      const cdpx=(cd/p.T)*tw*0.5,chpx=(ch/p.H)*th,turns=Math.min(5,6);
+      const cy0=ty+th-chpx-th*0.05,step=chpx/Math.max(turns,1);
+      for(let j=0;j<turns;j++) obs+=`<ellipse cx="${cx}" cy="${cy0+j*step+step*0.35}" rx="${cdpx}" ry="${step*0.35}" fill="none" stroke="${coilCol}" stroke-width="1.5" opacity="0.8"/>`;
+      obs+=`<text x="${cx}" y="${ty+8}" font-size="8" fill="${coilCol}" text-anchor="middle">${isHeat?'heat coil':'full coil'}</text>`;
+    } else if(o.type==='sparger'){
+      const sd=(o.sparger_d||p.T*0.6),sdpx=(sd/p.T)*tw*0.5,sy=ty+th*(1-(o.sparger_pos||0.05))-6;
+      obs+=`<ellipse cx="${cx}" cy="${sy}" rx="${sdpx}" ry="3" fill="none" stroke="#888" stroke-width="1.5" stroke-dasharray="3 2"/>`;
+      obs+=`<text x="${tx+2}" y="${sy-5}" font-size="8" fill="#888">sparger</text>`;
+    } else if(o.type==='probe'){
+      const dep=(o.probe_depth||0.8)*th,pw=Math.max((o.probe_d||0.02)/p.T*tw,2);
+      obs+=`<rect x="${tx+8}" y="${ty+th-dep}" width="${pw}" height="${dep}" fill="#bbb" rx="1" opacity="0.8"/>`;
+      obs+=`<text x="${tx+14}" y="${ty+th-dep-3}" font-size="8" fill="#888">probe</text>`;
+    } else if(o.type==='heat_plate'){
+      const pw=(o.plate_w_frac||0.15)*tw,ph2=(o.plate_h_frac||0.8)*th,px=tx+tw*0.1;
+      obs+=`<rect x="${px}" y="${ty+th-ph2}" width="${pw}" height="${ph2}" fill="#c0d8f0" stroke="#7aaccc" stroke-width="1" rx="2" opacity="0.7"/>`;
+      obs+=`<text x="${px+pw/2}" y="${ty+th-ph2-3}" font-size="8" fill="#5588aa" text-anchor="middle">plate</text>`;
+    }
+  }
+
+  const dim=`<text x="${tx-2}" y="${ty+th/2}" font-size="9" fill="${col}" text-anchor="end" dominant-baseline="middle">H=${p.H}m</text>
+    <text x="${cx}" y="${ty+th+be*2+12}" font-size="9" fill="${col}" text-anchor="middle">T=${p.T}m</text>
+    <text x="${cx}" y="${SH-5}" font-size="9" fill="#999" text-anchor="middle">D/T=${(p.D/p.T).toFixed(2)}  C/T=${(p.C/p.T).toFixed(2)}</text>`;
+
+  svg.innerHTML=`<rect x="${tx}" y="${ty}" width="${tw}" height="${th}" fill="${lc}" rx="2"/>
+    ${baff}${obs}${shaft}${impsvg}
+    <rect x="${tx}" y="${ty}" width="${tw}" height="${th}" fill="none" stroke="${col}" stroke-width="1.8" rx="2"/>
+    ${bsvg}${dim}`;
+}
+
+function drawImp(type,cx,iy,Dpx,col){
+  const h=Dpx/2;
+  if(type==='rushton')return`<g><line x1="${cx-h}" y1="${iy}" x2="${cx+h}" y2="${iy}" stroke="${col}" stroke-width="3" stroke-linecap="round"/>${[-h,-h/2,h/2,h].map(x=>`<line x1="${cx+x}" y1="${iy-4}" x2="${cx+x}" y2="${iy+4}" stroke="${col}" stroke-width="2"/>`).join('')}</g>`;
+  if(type==='ptb')return`<g><line x1="${cx-h}" y1="${iy+4}" x2="${cx}" y2="${iy-2}" stroke="${col}" stroke-width="3" stroke-linecap="round"/><line x1="${cx+h}" y1="${iy+4}" x2="${cx}" y2="${iy-2}" stroke="${col}" stroke-width="3" stroke-linecap="round"/></g>`;
+  if(type==='hydrofoil')return`<path d="M${cx-h} ${iy+3} Q${cx} ${iy-5} ${cx+h} ${iy+3}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linecap="round"/>`;
+  if(type==='propeller')return`<path d="M${cx-h} ${iy+2} Q${cx} ${iy-3} ${cx+h} ${iy+2}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round"/><path d="M${cx-h*.4} ${iy-4} Q${cx} ${iy+2} ${cx+h*.4} ${iy-4}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linecap="round"/>`;
+  if(type==='anchor')return`<path d="M${cx-h} ${iy+10} L${cx-h} ${iy-8} L${cx+h} ${iy-8} L${cx+h} ${iy+10}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="${cx-h}" y1="${iy+4}" x2="${cx+h}" y2="${iy+4}" stroke="${col}" stroke-width="1.5"/>`;
+  return`<line x1="${cx-h}" y1="${iy}" x2="${cx+h}" y2="${iy}" stroke="${col}" stroke-width="3" stroke-linecap="round"/>`;
+}
+
+// ===== TABS =====
+function showTab(n,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');
+  btn.classList.add('active');
+}
+
+function showNNFields(){
+  const ft=document.getElementById('fluid-type').value;
+  document.getElementById('nn-fields').style.display=ft!=='newtonian'?'block':'none';
+  document.getElementById('bingham-fields').style.display=ft==='bingham'?'block':'none';
+}
+function showBaffleCustom(sc){
+  document.getElementById(sc+'-baffle-custom').style.display=document.getElementById(sc+'-baffle-type').value==='custom'?'block':'none';
+}
+function rcls(r){const d=Math.abs(r-1);if(d<0.15)return'rg';if(d<0.4)return'ra';return'rr';}
+
+const GOAL_DESCS={
+  pv:'<b>P/V:</b> Same volumetric energy input. Drives turbulent intensity, k<sub>L</sub>a, and heat transfer. Most common starting criterion. <i>Trade-off: tip speed and blend time both change — blend time worsens at large scale.</i>',
+  tipspeed:'<b>Tip speed:</b> Same maximum blade velocity (π·D·N). Controls peak shear on cells, crystals, and fragile structures. Best for shear-sensitive processes. <i>Trade-off: P/V drops significantly at large scale.</i>',
+  re:'<b>Reynolds number:</b> Same ratio of inertial to viscous forces. Preserves flow regime character. Rarely achievable at large scale — requires impractically high N. Use for regime benchmarking only. <i>Trade-off: N required is enormous.</i>',
+  blendtime:'<b>Blend time:</b> Same 95% homogenization time. Essential when fast reactions or pH sensitivity make local gradients damaging. <i>Trade-off: P/V must increase steeply at large scale. Always increases on scale-up unless deliberately over-powered.</i>',
+  njs:'<b>N_js:</b> Same minimum particle suspension speed (Zwietering). Ensures solids stay in suspension at both scales. C/T must also match for this to be reliable. <i>Trade-off: P/V and blend time will differ.</i>',
+  fr:'<b>Froude number:</b> Same ratio of inertial to gravitational forces. Controls vortex formation, surface entrainment. Meaningful mainly for unbaffled tanks. <i>Trade-off: rarely used alone.</i>'
+};
+
+// ===== IMPELLER SPACING CHECK =====
+function checkSpacing(p){
+  if(p.nimp<2) return null;
+  // Standard spacing: impellers should be spaced 0.8–1.5 D apart
+  // With nimp impellers over liquid height, spacing = H/(nimp-1) approximately
+  const spacing_est = p.H / (p.nimp - 1);
+  const SD = spacing_est / p.D;
+  if(SD < 0.8) return{ok:false,SD,msg:`Estimated impeller spacing S/D ≈ ${SD.toFixed(2)} < 0.8 — impellers too close. Minimum recommended S/D = 1.0–1.5 for non-interacting operation.`};
+  if(SD > 3.0) return{ok:false,SD,msg:`Estimated impeller spacing S/D ≈ ${SD.toFixed(2)} > 3.0 — large dead zones likely between impellers. Consider closer spacing or additional impeller.`};
+  return{ok:true,SD};
+}
+
+// ===== HEAT TRANSFER =====
+function calcHeatTransfer(p,sc){
+  const Qrxn=+document.getElementById('q-rxn').value||5; // W/L
+  const Tcool_in=+document.getElementById('t-cool-in').value||10;
+  const Tproc=+document.getElementById('t-proc').value||37;
+  const U=+document.getElementById('htc-u').value||400;
+  const jacket_frac=(+document.getElementById('jacket-pct').value||100)/100;
+
+  // Electrical heaters
+  const elec_s_on=document.getElementById('has-elec-s').checked;
+  const elec_l_on=document.getElementById('has-elec-l').checked;
+  const Q_elec = sc==='s'
+    ? (elec_s_on ? +document.getElementById('elec-s-w').value||0 : 0)
+    : (elec_l_on ? +document.getElementById('elec-l-w').value||0 : 0);
+
+  // Heat load: reaction + agitation (both heat the fluid)
+  const Q_rxn_W=Qrxn*p.Vliq*1000; // W
+  const Q_total=Q_rxn_W+p.P; // positive = cooling needed, negative = heating needed
+
+  // Jacket area with coverage fraction
+  const A_jacket_full=Math.PI*p.T*p.H;
+  const A_jacket=A_jacket_full*jacket_frac;
+  const dT_jacket=Math.max(0,Tproc-Tcool_in); // only positive when process warmer than coolant
+  const Q_jacket=U*A_jacket*dT_jacket;
+
+  // Obstruction-based HX areas
+  const obs=sc==='s'?s_obs:l_obs;
+  let A_cool_coil=0, Q_cool_coil=0;
+  let A_heat_coil=0, Q_heat_coil=0;
+  let A_plates=0, Q_plates=0;
+
+  for(const o of obs){
+    const type=o.type;
+    if(type==='coil_wall'||type==='coil_full'||type==='heat_coil_wall'||type==='heat_coil_full'){
+      const d=o.coil_od||p.T*0.8, pd=o.coil_pipe_d||0.025, turns=o.coil_turns||5;
+      const A=turns*Math.PI*d * Math.PI*pd;
+      const isHeat=type==='heat_coil_wall'||type==='heat_coil_full';
+      if(isHeat){
+        const T_fluid=o.fluid_t_in||80;
+        A_heat_coil+=A;
+        Q_heat_coil+=U*A*Math.max(0,T_fluid-Tproc);
+      } else {
+        A_cool_coil+=A;
+        Q_cool_coil+=U*A*Math.max(0,Tproc-Tcool_in);
+      }
+    } else if(type==='heat_plate'){
+      const pw=(o.plate_w_frac||0.15)*p.T;
+      const ph2=(o.plate_h_frac||0.8)*p.H;
+      A_plates+=2*pw*ph2;
+      Q_plates+=U*2*pw*ph2*Math.max(0,Tproc-Tcool_in);
+    }
+  }
+
+  const A_cool_total=A_jacket+A_cool_coil+A_plates;
+  const Q_removable=Q_jacket+Q_cool_coil+Q_plates; // total cooling capacity
+  const Q_heating_avail=Q_heat_coil+Q_elec;         // total heating capacity
+  const Q_net=Q_total-Q_removable;  // >0: cooling deficit; <0: excess cooling
+  const feasible_cool=Q_removable>=Q_total;
+
+  return{
+    Q_rxn_W,Q_total,Q_removable,Q_net,feasible_cool,
+    A_jacket,A_jacket_full,jacket_frac,
+    A_cool_coil,A_heat_coil,A_plates,A_cool_total,
+    Q_jacket,Q_cool_coil,Q_heat_coil,Q_plates,
+    Q_heating_avail,Q_elec,
+    dT_jacket,Tcool_in,Tproc,U,Qrxn
+  };
+}
+
+// ===== FEASIBILITY WINDOW (3-phase / gas-liq / solid-liq) =====
+function renderFeasibility(s,l){
+  const ctx=CTX[activeCtx];
+  const isGL=activeCtx==='gasliq'||activeCtx==='threephase';
+  const isSL=activeCtx==='solidliq'||activeCtx==='threephase';
+  const is3P=activeCtx==='threephase';
+
+  let html=`<h2 style="margin-bottom:8px">Operating feasibility window</h2>`;
+
+  if(!isGL&&!isSL){
+    html+=`<div class="ib">Feasibility window analysis is active for Gas-liquid, Solid-liquid, and 3-phase contexts. Select one of those contexts to see constraint mapping.</div>`;
+    document.getElementById('feasibility-content').innerHTML=html;
+    return;
+  }
+
+  // For each scale, sweep N and compute constraint status
+  function computeConstraints(p,sc){
+    const Nmin=5,Nmax=Math.max(p.N_rpm*3,200);
+    const steps=80;
+    const pts=[];
+    for(let i=0;i<=steps;i++){
+      const Nr=Nmin+(Nmax-Nmin)*i/steps;
+      const Ns=Nr/60;
+      const vvm_id=sc==='s'?'vvm-s':'vvm-l';
+      const vvm=+document.getElementById(vvm_id).value||1.0;
+      const Vb=p.Vliq;
+      const Qg=vvm*Vb/60;
+      const Np2=getNp(p.imp,p.rho*Ns*p.D*p.D/p.mu,p.baffle);
+      const Pow=Np2*p.rho*Ns**3*p.D**5*p.nimp;
+      const PVn=Pow/Vb;
+      const kla_n=calcKla(Ns,p.D,PVn,Vb,Qg,p.rho);
+      const Nfl=calcNflood(p.imp,Ns,p.D,p.T,Qg)/60;
+      const aboveNjs=Nr>=p.Njs*60;
+      const belowFlood=Nr<=Nfl*60;
+      const kla_ok=kla_n*0.21>=(+document.getElementById('o2-demand').value||80)/1000;
+      pts.push({Nr,PVn,kla_n,aboveNjs,belowFlood,kla_ok,Nfl_rpm:Nfl*60});
+    }
+    return pts;
+  }
+
+  for(const[lbl,p,sc,col] of[['Small scale',s,'s','#185FA5'],['Large scale',l,'l','#BA7517']]){
+    const pts=computeConstraints(p,sc);
+    const Njs_rpm=p.Njs*60;
+    const Nfl_rpm_cur=p.Nflood_rpm;
+    const valid_pts=pts.filter(pt=>{
+      let ok=true;
+      if(isSL) ok=ok&&pt.aboveNjs;
+      if(isGL) ok=ok&&pt.belowFlood&&pt.kla_ok;
+      return ok;
+    });
+    const N_lo=valid_pts.length?valid_pts[0].Nr:null;
+    const N_hi=valid_pts.length?valid_pts[valid_pts.length-1].Nr:null;
+    const N_current=p.N_rpm;
+    const in_window=N_lo!==null&&N_current>=N_lo&&N_current<=N_hi;
+    const window_exists=valid_pts.length>0;
+
+    html+=`<div style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h3 style="color:${col}">${lbl}</h3>
+        ${window_exists?(in_window?'<span class="badge b-ok">✓ Current N within window</span>':'<span class="badge b-e">✗ Current N outside window</span>'):'<span class="badge b-e">No valid window exists</span>'}
+      </div>`;
+
+    // Constraint bars
+    const Nmax_plot=Math.max(p.N_rpm*2.5,Nfl_rpm_cur*1.3,Njs_rpm*1.5,200);
+
+    if(isSL){
+      const pct_njs=Math.min(Njs_rpm/Nmax_plot*100,100);
+      const pct_cur=Math.min(N_current/Nmax_plot*100,100);
+      html+=`<div class="cbar-wrap">
+        <div class="cbar-label"><span>N_js (Zwietering): ${fmt(Njs_rpm,0)} rpm</span><span style="color:${N_current>=Njs_rpm?'#3B6D11':'#A32D2D'}">${N_current>=Njs_rpm?'✓ Above N_js':'✗ Below N_js — solids settling'}</span></div>
+        <div class="cbar-track" style="background:#eee">
+          <div class="cbar-fill" style="left:${pct_njs}%;right:0;background:#EAF3DE;border-left:2px solid #639922"></div>
+          <div class="cbar-marker" style="left:${pct_cur}%;background:${col}" title="Current N"></div>
+          <div style="position:absolute;left:${pct_njs}%;top:-14px;transform:translateX(-50%);font-size:9px;color:#639922">N_js</div>
+        </div>
+      </div>`;
+    }
+    if(isGL){
+      const pct_fl=Math.min(Nfl_rpm_cur/Nmax_plot*100,100);
+      const pct_cur=Math.min(N_current/Nmax_plot*100,100);
+      const o2demand=+document.getElementById('o2-demand').value||80;
+      html+=`<div class="cbar-wrap">
+        <div class="cbar-label"><span>N_flood: ${fmt(Nfl_rpm_cur,0)} rpm</span><span style="color:${!p.flooded?'#3B6D11':'#A32D2D'}">${!p.flooded?'✓ Not flooded':'✗ FLOODED — gas overwhelming impeller'}</span></div>
+        <div class="cbar-track">
+          <div class="cbar-fill" style="left:0;width:${pct_fl}%;background:#EAF3DE"></div>
+          <div class="cbar-fill" style="left:${pct_fl}%;right:0;background:#FCEBEB"></div>
+          <div class="cbar-marker" style="left:${pct_cur}%;background:${col}"></div>
+          <div style="position:absolute;left:${pct_fl}%;top:-14px;transform:translateX(-50%);font-size:9px;color:#A32D2D">N_flood</div>
+        </div>
+      </div>
+      <div class="cbar-wrap">
+        <div class="cbar-label"><span>k_La: ${fmt(p.kla,1)} h⁻¹ → OTR_max: ${fmt(p.OTR_max,1)} mmol/L/h</span><span style="color:${p.OTR_max>=o2demand/1000?'#3B6D11':'#A32D2D'}">${p.OTR_max>=o2demand/1000?'✓ OTR sufficient':'✗ OTR insufficient — O₂ limiting'}</span></div>
+      </div>`;
+    }
+
+    if(window_exists){
+      html+=`<div style="background:#f8f8f6;border-radius:6px;padding:8px;font-size:12px;margin-top:8px">
+        <b>Valid N window:</b> ${fmt(N_lo,0)} – ${fmt(N_hi,0)} rpm
+        &nbsp;|&nbsp; <b>Current N:</b> <span style="color:${in_window?'#3B6D11':'#A32D2D'}">${fmt(N_current,0)} rpm</span>
+        ${in_window?'':`&nbsp;|&nbsp; <b style="color:#A32D2D">Recommended: set N to ${fmt((N_lo+N_hi)/2,0)} rpm</b>`}
+      </div>`;
+    } else {
+      html+=`<div class="eb">No operating point satisfies all constraints simultaneously at this geometry and gas rate. Consider: increasing D/T, reducing vvm, changing impeller type (Rushton disperses gas better), or accepting a process compromise.</div>`;
+    }
+    html+=`</div>`;
+  }
+
+  if(is3P){
+    html+=`<div class="wb"><b>3-phase note:</b> N_js and flooding constraints act in opposite directions — higher N suspends solids but risks flooding. The valid window is where N ≥ N_js AND N ≤ N_flood AND k_La meets OTR demand. If no window exists, geometry must change: larger D, more impellers (lower N per impeller), or reduced gas rate per impeller stage.</div>`;
+  }
+
+  document.getElementById('feasibility-content').innerHTML=html;
+}
+
+// ===== MAIN UPDATE =====
+function update(){
+  showNNFields();
+  showBaffleCustom('s');
+  showBaffleCustom('l');
+
+  const s=getInputs('s'),l=getInputs('l');
+  const goal=document.getElementById('scaleup-goal').value;
+  const sr=l.T/s.T;
+
+  // Goal desc
+  const gd=document.getElementById('goal-desc');
+  if(gd) gd.innerHTML=GOAL_DESCS[goal]||'';
+
+  // Vol/mass
+  ['s','l'].forEach(sc=>{
+    const p=sc==='s'?s:l;
+    document.getElementById(sc+'-vol').textContent=fmt(p.Vliq*1000,1)+' L';
+    document.getElementById(sc+'-mass').textContent=fmt(p.Vliq*p.rho,1)+' kg';
+  });
+
+  // Geo score
+  const geo=geoScore(s,l);
+  const geo_low=geo.score<60;
+  document.getElementById('geo-val').textContent=geo.score;
+  const gc=geo.score>=80?'#3B6D11':geo.score>=60?'#BA7517':'#A32D2D';
+  document.getElementById('geo-fill').style.cssText=`width:${geo.score}%;background:${gc}`;
+  document.getElementById('geo-badge').innerHTML=geo.score>=80?'<span class="badge b-ok">Geometrically similar</span>':geo.score>=60?'<span class="badge b-w">Partial similarity</span>':'<span class="badge b-e">Low similarity — criteria locked</span>';
+  document.getElementById('geo-details').innerHTML=geo.items.map(it=>{
+    const d=Math.abs(it.lv/it.sv-1);const c=d<0.15?'#3B6D11':d<0.4?'#BA7517':'#A32D2D';
+    return`<span style="margin-right:12px;color:${c}">${it.n}: S=${it.sv} L=${it.lv}</span>`;
+  }).join('');
+
+  let gw='';
+  if(Math.abs(s.D/s.T-l.D/l.T)>0.1) gw+=`<div class="wb" style="margin-top:6px"><b>D/T mismatch:</b> ${fmt(s.D/s.T)} vs ${fmt(l.D/l.T)}.</div>`;
+  if(s.imp!==l.imp) gw+=`<div class="wb" style="margin-top:6px"><b>Impeller type mismatch:</b> ${imp_lbl[s.imp]} ≠ ${imp_lbl[l.imp]}. Np and flow pattern differ.</div>`;
+  if((s.baffle.n===0)!==(l.baffle.n===0)) gw+=`<div class="wb" style="margin-top:6px"><b>Baffling mismatch:</b> one tank unbaffled.</div>`;
+  document.getElementById('geo-warns').innerHTML=gw;
+
+  drawTank('svg-s',s,'s');
+  drawTank('svg-l',l,'l');
+  const sr2=getRegime(s.Re),lr2=getRegime(l.Re);
+  document.getElementById('info-s').innerHTML=`V=${fmt(s.Vliq*1000,1)} L · Re=${fmt(s.Re,0)} · <span style="color:${sr2.color}">${sr2.label}</span>`;
+  document.getElementById('info-l').innerHTML=`V=${fmt(l.Vliq*1000,1)} L · Re=${fmt(l.Re,0)} · <span style="color:${lr2.color}">${lr2.label}</span>`;
+
+  // N recommendation callout
+  const N_rec_map={pv:s.N*(s.D/l.D)**(2/3),tipspeed:s.N*(s.D/l.D),re:s.N*(s.D/l.D)**2,blendtime:s.N*(s.T/l.T)*(l.D/s.D)**(2/3),njs:s.N*(s.D/l.D)**0.85,fr:s.N*(s.D/l.D)**0.5};
+  const Nrec_rpm=(N_rec_map[goal]||s.N)*60;
+  const Ndiff=Math.abs(l.N_rpm-Nrec_rpm)/Nrec_rpm;
+  const cr=document.getElementById('n-rec-callout');
+  cr.style.display='block';
+  cr.innerHTML=`<div class="n-callout">
+    <div>
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:2px">Recommended N — large scale</div>
+      <div class="nc-val">${fmt(Nrec_rpm,0)} rpm</div>
+    </div>
+    <div style="flex:1">
+      <div class="nc-label">To match <b>${goal.toUpperCase()}</b> criterion from small scale (${fmt(s.N_rpm,0)} rpm, D=${s.D}m → D=${l.D}m)</div>
+      <div style="margin-top:4px">${Math.abs(l.N_rpm-Nrec_rpm)<2?'<span class="badge b-ok">✓ Current N matches</span>':`<span class="badge b-w">Current N = ${fmt(l.N_rpm,0)} rpm — off by ${fmt(Math.abs(Ndiff)*100,0)}%</span>`}</div>
+    </div>
+  </div>`;
+
+  const ctxCfg=CTX[activeCtx];
+  const hasGas=ctxCfg.hasGas;
+  const hasRxn=ctxCfg.hasRxn;  // currently no context sets this true — sec-da always shows
+
+  // Global warnings — suppress gas-related ones when not in gas context
+  const warns=[];
+  if(s.Re<10000||l.Re<10000) warns.push({t:'w',m:`Non-turbulent: Re_s=${fmt(s.Re,0)}, Re_l=${fmt(l.Re,0)}. Most correlations require Re &gt; 10,000.`});
+  if(s.baffle.n===0||l.baffle.n===0) warns.push({t:'w',m:'Unbaffled tank detected. Fr correction required for power. Re comparisons invalid across baffled/unbaffled.'});
+  if(hasGas&&(s.Fr>0.1||l.Fr>0.1)) warns.push({t:'w',m:`Gas entrainment risk: Fr_s=${fmt(s.Fr,3)}, Fr_l=${fmt(l.Fr,3)}. Fr > 0.1 → surface vortex and air incorporation.`});
+  if(s.D/s.T<0.15||l.D/l.T<0.15) warns.push({t:'e',m:'D/T < 0.15: impeller very small. Poor power transfer and bulk mixing.'});
+  if(s.C>=s.H||l.C>=l.H) warns.push({t:'e',m:'Off-bottom clearance C ≥ liquid height H. Check inputs.'});
+  if(s.ft!=='newtonian') warns.push({t:'i',m:'Non-Newtonian: Metzner-Otto effective viscosity used. Valid for homogeneous fluids only.'});
+  if(s.imp==='anchor'||l.imp==='anchor') warns.push({t:'i',m:'Anchor impeller: laminar flow only. Turbulent correlations do not apply.'});
+  if(sr2.label!==lr2.label) warns.push({t:'e',m:`Regime mismatch: small=${sr2.label}, large=${lr2.label}. Scale-up predictions unreliable.`});
+  if(hasGas&&(s.flooded||l.flooded)) warns.push({t:'e',m:`Impeller flooding detected. Gas flow overwhelms impeller pumping — dispersion collapses. Reduce vvm or increase N (if below flood limit).`});
+  document.getElementById('global-warns').innerHTML=warns.map(w=>`<div class="${w.t==='e'?'eb':w.t==='i'?'ib':'wb'}">${w.m}</div>`).join('');
+
+  // Damköhler panel — only shown when "has reaction" is checked
+  const hasRxnChecked=document.getElementById('has-rxn').checked;
+  const tHalf=+document.getElementById('t-half').value||30;
+  const Da_s=hasRxnChecked&&s.blend!==null?s.blend/tHalf:null;
+  const Da_l=hasRxnChecked&&l.blend!==null?l.blend/tHalf:null;
+  let daHtml='';
+  if(hasRxnChecked&&(Da_s!==null||Da_l!==null)){
+    const daClass=(da)=>da<0.1?{c:'#3B6D11',lbl:'Mixing fast — not limiting'}:da<1?{c:'#854F0B',lbl:'Mixing coupled to reaction'}:{c:'#A32D2D',lbl:'Mixing limiting — affects yield/selectivity'};
+    const ds=Da_s!==null?daClass(Da_s):null,dl=Da_l!==null?daClass(Da_l):null;
+    daHtml=`<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px">Damköhler number Da = θ_blend / t½ <span class="tip"><span class="ti">i</span><span class="tb"><span class="tt">Damköhler number</span>Da &lt;&lt; 1: mixing fast, chemistry limits — criterion choice matters little. Da ≈ 1: mixing and reaction coupled — criterion critical. Da &gt;&gt; 1: mixing limits — local gradients control selectivity and yield.<span class="tcite">Baldyga & Bourne (1999) Turbulent Mixing and Chemical Reactions</span></span></span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${ds?`<div><div style="font-size:11px;color:var(--muted)">Small scale</div><div style="font-size:20px;font-weight:700;color:${ds.c}">${fmt(Da_s,2)}</div><div style="font-size:11px;color:${ds.c}">${ds.lbl}</div></div>`:''}
+        ${dl?`<div><div style="font-size:11px;color:var(--muted)">Large scale</div><div style="font-size:20px;font-weight:700;color:${dl?dl.c:'#888'}">${fmt(Da_l,2)}</div><div style="font-size:11px;color:${dl?dl.c:'#888'}">${dl?dl.lbl:'—'}</div></div>`:''}
+      </div>
+      ${Da_l!==null&&Da_l>1&&Da_s!==null&&Da_s<0.5?`<div class="wb" style="margin-top:8px"><b>Da shift on scale-up:</b> Process transitions from mixing-fast (small) to mixing-limited (large). Scale-up criterion choice is critical — consider equal blend time.</div>`:''}
+    </div>`;
+  }
+  document.getElementById('da-panel').innerHTML=daHtml;
+
+  // Context-highlighted params
+  const hiSet=new Set(ctxCfg.highlight||[]);
+
+  // Build params
+  const params=[
+    {n:'Reynolds number Re',tip:{t:'Reynolds number',b:'Re = ρND²/μ. >10k turbulent; 100–10k transitional; <100 laminar.',v:'Most correlations require Re > 10,000.',c:'Tatterson (1991)'},sv:s.Re,lv:l.Re,u:'—',d:0,lk:false},
+    {n:'Tip speed u_tip',tip:{t:'Tip speed',b:'u_tip = π·D·N. Controls peak shear.',v:'Best criterion for shear-sensitive processes.',c:'Nienow (1998) Chem. Eng. J. 70:143'},sv:s.tip,lv:l.tip,u:'m/s',d:2,lk:false},
+    {n:'P/V',tip:{t:'Power per unit volume',b:'P/V = Np·ρ·N³·D⁵/V. Drives k_La, turbulence, heat transfer.',v:'Valid turbulent regime. Gassed P/V ≈ 0.4–0.7× ungassed.',c:"Van't Riet & Tramper (1991)"},sv:s.PV,lv:l.PV,u:'W/m³',d:1,lk:false},
+    {n:'P/V gassed',tip:{t:'Gassed power per volume',b:'Gas reduces apparent fluid density around impeller — gassed power is 40–70% of ungassed (Michel-Miller). Critical to use gassed P/V for k_La in aerated systems.',v:'Michel-Miller is approximate. Valid for D/T 0.25–0.45.',c:'Michel & Miller (1962) AIChE J. 8:262'},sv:s.P_gassed/s.Vliq,lv:l.P_gassed/l.Vliq,u:'W/m³',d:1,lk:activeCtx!=='gasliq'&&activeCtx!=='threephase'},
+    {n:'Froude number Fr',tip:{t:'Froude number',b:'Fr = N²D/g. Controls surface behavior and vortex.',v:'Mainly relevant for unbaffled tanks.',c:'Rushton et al. (1950) Chem. Eng. Prog. 46:395'},sv:s.Fr,lv:l.Fr,u:'—',d:3,lk:false},
+    {n:'Blend time θ_m (95%)',tip:{t:'Blend time',b:'θ_m ≈ 5.9·(T/D)²·(D/T)^(1/3)/N. Always increases on scale-up.',v:'Turbulent only (Re > 10k). D/T = 0.2–0.5.',c:'Nienow (1997) Chem. Eng. Res. Des. 75:153'},sv:s.blend,lv:l.blend,u:'s',d:1,lk:geo_low},
+    {n:'Max shear rate γ̇',tip:{t:'Max shear rate (Metzner-Otto)',b:'γ̇ = k_s·N. Governs non-Newtonian μ_eff and mechanical stress.',v:'Bulk average — local near blade 10–100× higher.',c:'Metzner & Otto (1957) AIChE J. 3:3'},sv:s.shear,lv:l.shear,u:'s⁻¹',d:1,lk:false},
+    {n:'Pumping rate Q',tip:{t:'Pumping rate',b:'Q = NQ·N·D³. Volume pumped per unit time.',v:'Single impeller, turbulent, baffled.',c:'Paul et al. (2004) Handbook of Industrial Mixing Ch.6'},sv:s.Q,lv:l.Q,u:'m³/s',d:4,lk:false},
+    {n:'Circulation time θ_c',tip:{t:'Circulation time',b:'θ_c = V/Q. Mean loop time. θ_m ≈ 3–5×θ_c.',v:'Single circulation zone assumed.',c:'Nienow (1997)'},sv:s.circ,lv:l.circ,u:'s',d:2,lk:false},
+    {n:'Energy dissipation ε',tip:{t:'Mean turbulent ε',b:'ε = P/(ρV). Governs Kolmogorov scale and drop breakup.',v:'MEAN ε. Near-impeller is 10–100× higher.',c:'Hinze (1975) Turbulence 2nd ed.'},sv:s.eps,lv:l.eps,u:'m²/s³',d:3,lk:false},
+    {n:'Kolmogorov scale λ_K',tip:{t:'Kolmogorov microscale',b:'λ_K = (ν³/ε)^0.25 [μm]. Smallest eddy size. Compare to cell (~10 μm) or crystal size for damage risk.',v:'Based on mean ε.',c:'Kolmogorov (1941)'},sv:s.lK,lv:l.lK,u:'μm',d:1,lk:false},
+    {n:'Njs — just-suspended',tip:{t:'Zwietering just-suspended speed',b:'N_js = S·ν^0.1·(g·Δρ/ρ)^0.45·dp^0.2·X^0.13·D^(−0.85). S depends on C/D.',v:'Flat-bottomed baffled tanks. Newtonian carrier. X < 20 wt%.',c:'Zwietering (1958) Chem. Eng. Sci. 8:244'},sv:s.Njs*60,lv:l.Njs*60,u:'rpm',d:0,lk:false},
+    {n:'k_La',tip:{t:'Volumetric mass transfer coefficient',b:'k_La [h⁻¹] from van\'t Riet correlation: k_La = 0.026·(P/V)^0.4·u_s^0.5. OTR_max = k_La × C* where C* ≈ 0.21 mmol/L at 37°C.',v:'Coalescent media (water-like). ±50% accuracy. Does not account for foam or antifoam.',c:"van't Riet (1979) Ind. Eng. Chem. 18:357"},sv:s.kla,lv:l.kla,u:'h⁻¹',d:1,lk:activeCtx!=='gasliq'&&activeCtx!=='threephase'},
+    {n:'C/T — clearance ratio',tip:{t:'Off-bottom clearance ratio',b:'C/T: impeller height from floor normalised by T. Affects N_js and impeller discharge zone. Standard: C/T = 0.25–0.33 (axial). Does NOT appear in Re, P/V, blend time.',v:'C/T matters for solids suspension and bottom drawdown.',c:'Paul et al. (2004) Ch.10'},sv:s.C/s.T,lv:l.C/l.T,u:'—',d:3,lk:false},
+  ];
+
+  document.getElementById('pgrid').innerHTML=params.map(p=>{
+    const locked=p.lk;
+    const ratio=(!locked&&p.sv&&p.lv&&isFinite(p.sv)&&isFinite(p.lv))?p.lv/p.sv:null;
+    const rc=ratio?rcls(ratio):'';
+    const hi=hiSet.has(p.n);
+    return`<div class="pcard ${locked?'locked':rc==='rr'?'err':rc==='ra'?'warn':''}${hi?' hi':''}">
+      <div class="pname">${p.n} ${hi?'<span class="badge b-i" style="font-size:9px;padding:1px 5px">key</span>':''}<span class="tip" style="margin-left:auto"><span class="ti">i</span><span class="tb r"><span class="tt">${p.tip.t}</span>${p.tip.b}<span class="tv">⚠ ${p.tip.v}</span><span class="tcite">📚 ${p.tip.c}</span></span></span></div>
+      <div class="pvals">
+        <div><div style="font-size:9px;color:var(--subtle)">Small</div><div class="vs">${locked?'—':fmt(p.sv,p.d)}</div></div>
+        <div style="color:#ccc;font-size:13px;align-self:center">→</div>
+        <div><div style="font-size:9px;color:var(--subtle)">Large</div><div class="vl">${locked?'—':fmt(p.lv,p.d)}</div></div>
+        <span class="pu">${p.u}</span>
+      </div>
+      ${ratio&&!locked?`<div><span class="rpill ${rc}">×${ratio.toFixed(2)}</span></div>`:''}
+      ${locked?`<div><span class="badge b-x">Context inactive or geometry mismatch</span></div>`:''}
+    </div>`;
+  }).join('');
+
+  // Impeller spacing warning
+  const spS=checkSpacing(s),spL=checkSpacing(l);
+  let spHtml='';
+  if(spS&&!spS.ok) spHtml+=`<div class="wb">Small scale: ${spS.msg}</div>`;
+  if(spL&&!spL.ok) spHtml+=`<div class="wb">Large scale: ${spL.msg}</div>`;
+  document.getElementById('spacing-warn').innerHTML=spHtml;
+
+  // Regime summary
+  document.getElementById('regime-summ').innerHTML=`
+    <h3 style="margin-bottom:8px">Flow regime analysis</h3>
+    <div class="rbox ${sr2.cls}"><div style="display:flex;justify-content:space-between"><b>Small: ${sr2.label}</b><span>Re=${fmt(s.Re,0)}</span></div><div style="margin-top:3px;font-size:12px">${regDesc(sr2.label,s.imp)}</div></div>
+    <div class="rbox ${lr2.cls}"><div style="display:flex;justify-content:space-between"><b>Large: ${lr2.label}</b><span>Re=${fmt(l.Re,0)}</span></div><div style="margin-top:3px;font-size:12px">${regDesc(lr2.label,l.imp)}</div></div>
+    ${s.cav!==null?`<div class="ib">Bingham cavern estimate: radius/tank radius ≈ ${fmt(s.cav,2)}. If &lt;0.5, stagnant zones near wall.</div>`:''}`;
+
+  renderScaleUp(s,l,goal,geo,sr,geo_low);
+  renderFeasibility(s,l);
+  renderTradeoff(s,l);
+  renderHeatTransfer(s,l);
+  renderSensitivity(s,l);
+  renderPower(s,l);
+}
+
+function regDesc(r,imp){
+  if(r==='Turbulent') return'Full turbulence. Np constant. Blend time and NQ correlations valid.';
+  if(r==='Transitional') return'Np varies with Re. Scale-up difficult — avoid if possible.';
+  return imp==='anchor'?'Laminar — appropriate for anchor. Np ∝ 1/Re.':'Laminar. Turbulent correlations invalid. Consider ribbon or anchor impellers.';
+}
+
+function renderScaleUp(s,l,goal,geo,sr,geo_low){
+  const Nm={pv:s.N*(s.D/l.D)**(2/3),tipspeed:s.N*(s.D/l.D),re:s.N*(s.D/l.D)**2,blendtime:s.N*(s.T/l.T)*(l.D/s.D)**(2/3),njs:s.N*(s.D/l.D)**0.85,fr:s.N*(s.D/l.D)**0.5};
+  const crit=[
+    {k:'pv',lbl:'Equal P/V',Nr:Nm.pv*60,desc:'N ∝ (D_S/D_L)^(2/3)',when:'Gas-liquid, bioreactors, general reactions',tradeoff:'Tip speed up; blend time worsens',valid:!geo_low&&s.Re>10000,warn:geo_low?'Locked: geometry':s.Re<10000?'Warning: not turbulent':null},
+    {k:'tipspeed',lbl:'Equal tip speed',Nr:Nm.tipspeed*60,desc:'N ∝ D_S/D_L',when:'Shear-sensitive: cell culture, crystals',tradeoff:'P/V drops; blend time worsens',valid:true,warn:null},
+    {k:'re',lbl:'Equal Re',Nr:Nm.re*60,desc:'N ∝ (D_S/D_L)²',when:'Regime benchmarking (rarely practical)',tradeoff:'N impractically high at large scale',valid:!geo_low,warn:geo_low?'Locked: geometry':'Caution: usually impractical'},
+    {k:'blendtime',lbl:'Equal blend time',Nr:Nm.blendtime*60,desc:'N ∝ (T_S/T_L)·(D_L/D_S)^(2/3)',when:'Fast reactions, pH-sensitive, competitive selectivity',tradeoff:'P/V increases steeply at large scale',valid:s.Re>10000&&l.Re>10000&&!geo_low,warn:s.Re<10000||l.Re<10000?'Requires turbulent both scales':geo_low?'Locked':null},
+    {k:'njs',lbl:'Equal Njs',Nr:Nm.njs*60,desc:'N ∝ (D_S/D_L)^0.85',when:'Solid suspension, dissolution, crystallisation',tradeoff:'P/V and blend time both change',valid:true,warn:null},
+    {k:'fr',lbl:'Equal Froude',Nr:Nm.fr*60,desc:'N ∝ (D_S/D_L)^0.5',when:'Unbaffled tanks, surface-sensitive',tradeoff:'Meaningful only unbaffled',valid:s.baffle.n===0||l.baffle.n===0,warn:s.baffle.n>0&&l.baffle.n>0?'Caution: mainly for unbaffled':null},
+  ];
+  const sel=crit.find(c=>c.k===goal);
+  const lk=!sel.valid&&sel.warn&&sel.warn.startsWith('Locked');
+  let h=`<h2 style="margin-bottom:10px">Scale-up criterion: ${sel.lbl}</h2>
+  <div class="${lk?'eb':'ib'}" style="margin-bottom:12px">
+    <b>${sel.lbl}:</b> ${sel.desc}<br>
+    Recommended N_large: <b>${lk?'—':fmt(sel.Nr,0)} rpm</b> &nbsp;(current: ${fmt(l.N_rpm,0)} rpm)<br>
+    <span style="font-size:11px">Use when: ${sel.when}</span><br>
+    <span style="font-size:11px">Trade-off: ${sel.tradeoff}</span>
+    ${sel.warn?`<br><b style="font-size:11px">⚠ ${sel.warn}</b>`:''}
+  </div>
+  <table class="ctbl"><thead><tr><th>Criterion</th><th>Rec. N_L (rpm)</th><th>Use when</th><th>Status</th></tr></thead><tbody>`;
+  for(const c of crit){
+    const lk2=!c.valid&&c.warn&&c.warn.startsWith('Locked');
+    h+=`<tr style="${c.k===goal?'background:#f0f6ff':''}">
+      <td><b>${c.lbl}</b><br><span style="font-size:10px;color:var(--muted)">${c.desc}</span></td>
+      <td>${lk2?'<span class="badge b-x">Locked</span>':fmt(c.Nr,0)}</td>
+      <td style="font-size:11px">${c.when}</td>
+      <td>${c.warn?(lk2?'<span class="badge b-e">Locked</span>':'<span class="badge b-w">Warning</span>'):'<span class="badge b-ok">Valid</span>'}</td>
+    </tr>`;
+  }
+  h+=`</tbody></table><div class="ib"><b>Key insight:</b> No single criterion preserves all parameters. The right choice depends on what physically limits your process outcome.</div>`;
+  document.getElementById('scaleup-content').innerHTML=h;
+}
+
+function renderTradeoff(s,l){
+  const Nmax=Math.min(l.N_rpm*5,500);
+  const rows=[];
+  for(let Nr=10;Nr<=Nmax;Nr+=10){
+    const Ns=Nr/60;
+    const Np2=getNp(l.imp,l.rho*Ns*l.D*l.D/l.mu,l.baffle);
+    const P2=Np2*l.rho*Ns**3*l.D**5*l.nimp;
+    const PV2=(P2/l.Vliq).toFixed(1);
+    const tip2=(Math.PI*l.D*Ns).toFixed(2);
+    const bt2=l.Re>1000?(5.9*(l.T/l.D)**2/(Ns*(l.D/l.T)**(1/3))).toFixed(1):'N/A';
+    const sh2=(ks_map[l.imp]*Ns).toFixed(1);
+    // gas
+    const vvm=+document.getElementById('vvm-l').value||1;
+    const Qg=vvm*l.Vliq/60;
+    const kla2=calcKla(Ns,l.D,P2/l.Vliq,l.Vliq,Qg,l.rho).toFixed(1);
+    const Nfl=calcNflood(l.imp,Ns,l.D,l.T,Qg).toFixed(0);
+    rows.push({Nr,PV2,tip2,bt2,sh2,kla2,Nfl});
+  }
+  let h=`<h2 style="margin-bottom:8px">Trade-off explorer — large scale</h2>
+  <div class="ib" style="margin-bottom:12px">How all parameters move together as large-scale N varies. Highlighted = current N. Blend time requires Re > 10,000.</div>
+  <table class="ctbl"><thead><tr><th>N (rpm)</th><th>P/V (W/m³)</th><th>Tip spd (m/s)</th><th>Blend time (s)</th><th>Shear (s⁻¹)</th><th>k_La (h⁻¹)</th><th>N_flood (rpm)</th></tr></thead><tbody>`;
+  for(const r of rows){
+    const cur=Math.abs(r.Nr-l.N_rpm)<6;
+    h+=`<tr style="${cur?'background:#EEF5FF;font-weight:600':''}">
+      <td>${r.Nr}${cur?' ◀':''}</td><td>${r.PV2}</td><td>${r.tip2}</td><td>${r.bt2}</td><td>${r.sh2}</td><td>${r.kla2}</td><td>${r.Nfl}</td>
+    </tr>`;
+  }
+  h+=`</tbody></table><div class="ib" style="margin-top:10px"><b>Universal constraint:</b> Blend time always increases on scale-up. k_La scales approximately as (P/V)^0.4 — less sensitive than power. N_flood decreases on scale-up for same gas rate, so large tanks flood more easily.</div>`;
+  document.getElementById('tradeoff-content').innerHTML=h;
+}
+
+function renderHeatTransfer(s,l){
+  const ht_active=document.getElementById('sec-ht').style.display!=='none';
+  let h=`<h2 style="margin-bottom:10px">Heat transfer analysis</h2>`;
+
+  if(!ht_active){
+    h+=`<div class="ib" style="margin-bottom:10px">Select the <b>Heat transfer limited</b> context to activate heat transfer inputs and full analysis. The area-vs-volume scaling summary below is always available.</div>`;
+  }
+
+  h+=`<div class="ib" style="margin-bottom:12px"><b>Scale-up challenge:</b> Jacket heat removal area scales as T² while heat generation volume scales as T³ — available cooling area per unit volume shrinks on every scale-up. Internal coils are the primary mitigation tool.</div>`;
+
+  h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">`;
+  for(const [lbl,p,sc,col] of [['Small scale',s,'s','var(--blue)'],['Large scale',l,'l','var(--amber)']]) {
+    const ht=calcHeatTransfer(p,sc);
+    h+=`<div class="psumm">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:${col};margin-bottom:8px">${lbl}</div>
+      <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:6px 0 3px">Heat removal surfaces</div>
+      <div class="prow"><span class="pk">Jacket (${fmt(ht.jacket_frac*100,0)}% coverage, ${fmt(ht.A_jacket_full,3)} m² wall)</span><span class="pv">${fmt(ht.A_jacket,3)} m² → ${fmt(ht.Q_jacket,0)} W</span></div>
+      ${ht.A_cool_coil>0?`<div class="prow"><span class="pk">Cooling coil(s)</span><span class="pv">${fmt(ht.A_cool_coil,3)} m² → ${fmt(ht.Q_cool_coil,0)} W</span></div>`:''}
+      ${ht.A_plates>0?`<div class="prow"><span class="pk">Heat transfer plate(s)</span><span class="pv">${fmt(ht.A_plates,3)} m² → ${fmt(ht.Q_plates,0)} W</span></div>`:''}
+      <div class="prow"><span class="pk"><b>Total cooling capacity</b></span><span class="pv" style="color:#185FA5;font-weight:700">${fmt(ht.Q_removable,0)} W</span></div>
+      <div class="prow"><span class="pk">Cooling area / vol.</span><span class="pv">${fmt(ht.A_cool_total/(p.Vliq*1000),4)} m²/L</span></div>
+      ${(ht.A_heat_coil>0||ht.Q_elec>0)?`<div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:8px 0 3px">Heating sources</div>
+      ${ht.A_heat_coil>0?`<div class="prow"><span class="pk">Heating coil(s)</span><span class="pv">${fmt(ht.A_heat_coil,3)} m² → ${fmt(ht.Q_heat_coil,0)} W</span></div>`:''}
+      ${ht.Q_elec>0?`<div class="prow"><span class="pk">Electrical resistance heater</span><span class="pv">${fmt(ht.Q_elec,0)} W</span></div>`:''}
+      <div class="prow"><span class="pk"><b>Total heating capacity</b></span><span class="pv" style="color:#9A4500;font-weight:700">${fmt(ht.Q_heating_avail,0)} W</span></div>`:''}
+      <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:8px 0 3px">Heat load</div>
+      <div class="prow"><span class="pk">Reaction (${fmt(ht.Qrxn,1)} W/L)</span><span class="pv">${fmt(ht.Q_rxn_W,0)} W</span></div>
+      <div class="prow"><span class="pk">Agitator input</span><span class="pv">${fmt(p.P,1)} W</span></div>
+      <div class="prow"><span class="pk"><b>Total heat load</b></span><span class="pv" style="font-weight:700">${fmt(ht.Q_total,0)} W</span></div>
+      <div class="prow" style="border-top:1px solid #eee;margin-top:6px;padding-top:6px">
+        <span class="pk">Net balance</span>
+        <span class="pv">${ht.feasible_cool
+          ?`<span class="badge b-ok">✓ +${fmt(ht.Q_removable-ht.Q_total,0)} W surplus</span>`
+          :`<span class="badge b-e">✗ −${fmt(Math.abs(ht.Q_net),0)} W deficit</span>`}
+        </span>
+      </div>
+    </div>`;
+  }
+  h+=`</div>`;
+
+  // Scale-up area/volume table
+  h+=`<div class="psumm" style="margin-bottom:12px">
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Scale-up heat removal metrics</div>
+    <div class="prow"><span class="pk">Volume scale-up</span><span class="pv">${fmt(l.Vliq/s.Vliq,1)}×</span></div>
+    <div class="prow"><span class="pk">Jacket area scale-up</span><span class="pv">${fmt(l.T**2/s.T**2,1)}×</span></div>
+    <div class="prow"><span class="pk">Jacket area / volume (large)</span><span class="pv" style="color:${l.T/s.T>2?'#A32D2D':'#3B6D11'}">${fmt(100*(s.T/l.T),0)}% of small-scale ratio</span></div>
+    <div class="prow"><span class="pk">Cooling area / vol (small)</span><span class="pv">${fmt(calcHeatTransfer(s,'s').A_cool_total/(s.Vliq*1000),4)} m²/L</span></div>
+    <div class="prow"><span class="pk">Cooling area / vol (large)</span><span class="pv">${fmt(calcHeatTransfer(l,'l').A_cool_total/(l.Vliq*1000),4)} m²/L</span></div>
+  </div>`;
+
+  h+=`<div class="wb"><b>When heat removal is limiting:</b> (1) Add internal coils — large area gain without changing tank geometry. (2) Semi-batch: add exothermic reagent slowly to spread heat load over time. (3) Reduce reaction rate via temperature or concentration. (4) Increase U with turbulence promoters. (5) Pre-cool feed streams. Heating coils are useful for startup and temperature maintenance — size for the worst-case ΔT at minimum N.</div>`;
+
+  document.getElementById('heattx-content').innerHTML=h;
+}
+
+function renderSensitivity(s,l){
+  if(document.getElementById('sens-mu')) return;
+  document.getElementById('sensitivity-content').innerHTML=`
+    <h2 style="margin-bottom:10px">Sensitivity to fluid properties</h2>
+    <div class="ib" style="margin-bottom:12px">Adjust viscosity and density independently to explore operating range, formulation tolerance, or temperature effect on mixing.</div>
+    <div style="background:#fafaf9;border:1px solid var(--border);border-radius:7px;padding:10px;margin-bottom:12px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px">Fluid property explorer</div>
+      <div class="sr"><label>Viscosity (mPa·s)</label><input type="range" id="sens-mu" min="0.5" max="5000" step="0.5" value="${(s.mu*1000).toFixed(1)}" oninput="syncSens('mu',this.value)"><input type="number" id="sens-mu-n" value="${(s.mu*1000).toFixed(1)}" min="0.1" max="100000" step="0.1" style="height:28px;font-size:12px" oninput="syncSens('mu',this.value)"><span style="font-size:11px;color:var(--muted)">mPa·s</span></div>
+      <div class="sr"><label>Density (kg/m³)</label><input type="range" id="sens-rho" min="700" max="2000" step="10" value="${s.rho}" oninput="syncSens('rho',this.value)"><input type="number" id="sens-rho-n" value="${s.rho}" min="100" max="3000" step="10" style="height:28px;font-size:12px" oninput="syncSens('rho',this.value)"><span style="font-size:11px;color:var(--muted)">kg/m³</span></div>
+    </div>
+    <div id="sens-out"></div>`;
+  calcSens();
+}
+
+function syncSens(p,v){
+  if(p==='mu'){document.getElementById('sens-mu').value=v;document.getElementById('sens-mu-n').value=parseFloat(v).toFixed(1);}
+  else{document.getElementById('sens-rho').value=v;document.getElementById('sens-rho-n').value=v;}
+  calcSens();
+}
+
+function calcSens(){
+  const mu=+document.getElementById('sens-mu-n').value;
+  const rho=+document.getElementById('sens-rho-n').value;
+  const mu_pa=mu*1e-3;
+  let out='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+  ['s','l'].forEach(sc=>{
+    const N=+document.getElementById(sc+'-N').value/60;
+    const D=+document.getElementById(sc+'-D').value;
+    const T=+document.getElementById(sc+'-T').value;
+    const H=+document.getElementById(sc+'-H').value;
+    const imp=document.getElementById(sc+'-imp').value;
+    const nimp=+document.getElementById(sc+'-nimp').value;
+    const baf=getBaffle(sc);baf.T=T;
+    const Re=rho*N*D*D/mu_pa;
+    const Np2=getNp(imp,Re,baf);
+    const P2=Np2*rho*N**3*D**5*nimp;
+    const V=Math.PI/4*T*T*H;
+    const PV2=P2/V;
+    const reg=getRegime(Re);
+    const bt=Re>10000?(5.9*(T/D)**2/(N*(D/T)**(1/3))).toFixed(1):'N/A';
+    const col=sc==='s'?'var(--blue)':'var(--amber)';
+    out+=`<div class="psumm"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:${col};margin-bottom:6px">${sc==='s'?'Small':'Large'} scale</div>
+      <div class="prow"><span class="pk">Re</span><span class="pv" style="color:${reg.color}">${fmt(Re,0)} (${reg.label})</span></div>
+      <div class="prow"><span class="pk">P/V</span><span class="pv">${fmt(PV2,1)} W/m³</span></div>
+      <div class="prow"><span class="pk">Blend time</span><span class="pv">${bt} s</span></div>
+      <div class="prow"><span class="pk">Np</span><span class="pv">${fmt(Np2,2)}</span></div>
+    </div>`;
+  });
+  out+='</div>';
+  const N_s=+document.getElementById('s-N').value/60,D_s=+document.getElementById('s-D').value;
+  const re_new=rho*N_s*D_s*D_s/mu_pa;
+  const re_orig=+document.getElementById('density').value*N_s*D_s*D_s/(+document.getElementById('viscosity').value*1e-3);
+  if(getRegime(re_new).label!==getRegime(re_orig).label) out+=`<div class="wb" style="margin-top:8px">Viscosity/density change has shifted the flow regime. Correlations may no longer be valid.</div>`;
+  document.getElementById('sens-out').innerHTML=out;
+}
+
+function renderPower(s,l){
+  const sf=1.2,eff=0.90;
+  let h=`<h2 style="margin-bottom:10px">Motor &amp; power estimates</h2>
+  <div class="ib" style="margin-bottom:12px">20% safety factor, 90% mechanical efficiency. Add 5–15% for gearbox and seals. Verify with vendor.</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">`;
+  for(const [lbl,p,col] of [['Small scale',s,'var(--blue)'],['Large scale',l,'var(--amber)']]) {
+    const Pm=p.P*sf/eff,T2=p.P/(2*Math.PI*p.N);
+    h+=`<div class="psumm">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:${col};margin-bottom:8px">${lbl}</div>
+      <div class="prow"><span class="pk">Shaft power (ungassed)</span><span class="pv">${fmt(p.P,2)} W</span></div>
+      <div class="prow"><span class="pk">Shaft power (gassed)</span><span class="pv">${fmt(p.P_gassed,2)} W</span></div>
+      <div class="prow"><span class="pk">Torque</span><span class="pv">${fmt(T2,2)} N·m</span></div>
+      <div class="prow"><span class="pk">Speed</span><span class="pv">${fmt(p.N_rpm,0)} rpm</span></div>
+      <div class="prow"><span class="pk">Power number Np</span><span class="pv">${fmt(p.Np,2)}</span></div>
+      <div class="prow" style="border-top:1px solid #eee;padding-top:5px;margin-top:2px"><span class="pk">Motor rating (20% SF, 90% eff)</span><span class="pv" style="color:${col}">${fmt(Pm,1)} W</span></div>
+    </div>`;
+  }
+  h+=`</div>
+  <div class="ib"><b>Scale-up power:</b> P ∝ N³D⁵ρ·Np. At constant P/V with geometric similarity: P_L/P_S = V_L/V_S. Torque increases faster than power on scale-up — shaft and seal sizing is often the mechanical constraint, not motor watts.</div>
+  <h3 style="margin:10px 0 6px">Impeller details</h3>
+  <table class="ctbl">
+    <tr><th>Tank</th><th>Impeller</th><th>Np (turbulent)</th><th>Flow</th><th>Note</th></tr>
+    <tr><td>Small</td><td>${imp_lbl[s.imp]}</td><td>${Np_map[s.imp]}</td><td>${flow_map[s.imp]}</td><td>${s.baffle.n===0?'Unbaffled: Np ~70% lower':s.Re<10000?'Transitional: Np varies':'Turbulent baffled: Np constant'}</td></tr>
+    <tr><td>Large</td><td>${imp_lbl[l.imp]}</td><td>${Np_map[l.imp]}</td><td>${flow_map[l.imp]}</td><td>${l.baffle.n===0?'Unbaffled: Np ~70% lower':l.Re<10000?'Transitional: Np varies':'Turbulent baffled: Np constant'}</td></tr>
+  </table>`;
+  document.getElementById('power-content').innerHTML=h;
+}
+
+// INIT
+renderObs('s');renderObs('l');
+setCtx('general',document.querySelector('.ctx-chip[data-ctx="general"]'));
+</script>
+</body>
+</html>
