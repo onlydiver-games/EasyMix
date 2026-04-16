@@ -2,15 +2,11 @@
 Mixing scale up calculation tool
 https://onlydiver-games.github.io/EasyMix/
 
-You're right — GitHub READMEs render as markdown and the table-heavy, header-heavy format above would look cluttered. Here's a version written for how people actually read READMEs:
-
----
 
 # Mixing Scale-Up Toolkit
 
 A browser-based tool for chemical engineers scaling up agitated tank operations from lab to pilot or production scale. Enter the geometry and conditions of two tanks and get dimensionless mixing parameters, scale-up criterion recommendations, feasibility analysis, and heat transfer estimates — all in one place, with inline explanations of the underlying correlations and their validity conditions.
 
-**[Live demo →](https://yourusername.github.io/your-repo-name)**
 
 ---
 
